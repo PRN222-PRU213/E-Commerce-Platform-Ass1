@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace E_Commerce_Platform_Ass1.Data.Database.Entities
+﻿namespace E_Commerce_Platform_Ass1.Data.Database.Entities
 {
     public class User
     {
@@ -24,5 +18,13 @@ namespace E_Commerce_Platform_Ass1.Data.Database.Entities
 
         // Navigation property
         public Role Role { get; set; } = null!;
+
+        public ICollection<Shop> Shops { get; set; } = new List<Shop>();
+
+        public ICollection<Cart> Carts { get; set; } = new List<Cart>();
+
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }
