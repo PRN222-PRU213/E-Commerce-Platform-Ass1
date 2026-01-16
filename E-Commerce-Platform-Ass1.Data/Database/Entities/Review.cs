@@ -22,9 +22,9 @@
 
         public string ModerationReason { get; set; } = string.Empty;
 
-        public DateTime ModeratedAt { get; set; }
+        public DateTime? ModeratedAt { get; set; }
 
-        public Guid ModeratedBy { get; set; }
+        public Guid? ModeratedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
