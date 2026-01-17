@@ -7,6 +7,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories.Interfaces
         Task<Cart?> GetByIdAsync(Guid cartId);
         Task<IEnumerable<Cart>> GetByUserIdAsync(Guid userId);
         Task<Cart?> GetCartByUserIdAsync(Guid userId);
+        Task<int> GetTotalItemCountAsync(Guid userId);
         Task<Cart> CreateAsync(Cart cart);
         Task<Cart> UpdateAsync(Cart cart);
         Task<bool> DeleteAsync(Cart cart);
