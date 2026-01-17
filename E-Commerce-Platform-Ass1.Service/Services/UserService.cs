@@ -87,23 +87,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             };
         }
 
-        public async Task<AuthenticatedUser?> GetUserByIdAsync(Guid userId)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-            {
-                return null;
-            }
-
-            return new AuthenticatedUser
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.Role?.Name ?? "Unknown"
-            };
-        }
-
         private static string HashPassword(string password)
         {
             // BCrypt tự sinh salt và lưu kèm trong hash
