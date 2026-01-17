@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using BCrypt.Net;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using E_Commerce_Platform_Ass1.Service.Utils;
 
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
@@ -38,7 +38,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Id = Guid.NewGuid(),
                 Name = name,
                 Email = email,
-                PasswordHash = HashPassword(password),
+                PasswordHash = PasswordHasher.HashPassword(password),
                 RoleId = userRole.RoleId,
                 Status = true,
                 CreatedAt = DateTime.UtcNow,
@@ -56,9 +56,18 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return null;
             }
 
-            if (!VerifyPassword(password, user.PasswordHash))
+            // Verify password with backward compatibility (supports both hash and plain text)
+            if (!PasswordHasher.VerifyPasswordWithBackwardCompat(password, user.PasswordHash))
             {
                 return null;
+            }
+
+            // If password is stored as plain text, automatically hash it for security
+            // This ensures migration happens gradually as users log in
+            if (!PasswordHasher.IsBcryptHash(user.PasswordHash))
+            {
+                user.PasswordHash = PasswordHasher.HashPassword(password);
+                await _userRepository.UpdateAsync(user);
             }
 
             return new AuthenticatedUser
@@ -85,17 +94,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Email = user.Email,
                 Role = user.Role?.Name ?? "Unknown"
             };
-        }
-
-        private static string HashPassword(string password)
-        {
-            // BCrypt tự sinh salt và lưu kèm trong hash
-            return BCrypt.Net.BCrypt.HashPassword(password);
-        }
-
-        private static bool VerifyPassword(string password, string hash)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, hash);
         }
     }
 }
