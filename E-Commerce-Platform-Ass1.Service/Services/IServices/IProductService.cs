@@ -9,7 +9,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
     public interface IProductService
     {
         /// <summary>
-        /// Tạo sản phẩm mới
+        /// Tạo sản phẩm mới (draft)
         /// </summary>
         Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto);
 
@@ -22,6 +22,16 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         /// Lấy sản phẩm theo Id
         /// </summary>
         Task<ServiceResult<ProductDto>> GetByIdAsync(Guid productId);
+
+        /// <summary>
+        /// Lấy chi tiết sản phẩm bao gồm variants (dùng cho trang Edit)
+        /// </summary>
+        Task<ServiceResult<ProductDetailDto>> GetProductDetailAsync(Guid productId, Guid shopId);
+
+        /// <summary>
+        /// Submit sản phẩm để admin duyệt (chuyển từ draft sang pending)
+        /// </summary>
+        Task<ServiceResult> SubmitProductAsync(Guid productId, Guid shopId);
 
         /// <summary>
         /// Lấy tất cả danh mục active

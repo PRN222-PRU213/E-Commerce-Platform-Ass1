@@ -11,6 +11,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories.Interfaces
     {
         Task<IEnumerable<Shop>> GetAllAsync();
         Task<Shop?> GetByIdAsync(Guid id);
+        Task<Shop?> GetByUserIdAsync(Guid userId);
         Task<IEnumerable<Shop>> GetByStatus(string status);
         Task<Shop> AddAsync(Shop shop);
         Task<Shop> UpdateAsync(Shop shop);

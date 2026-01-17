@@ -16,11 +16,17 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductService _productService;
+        private readonly IProductVariantService _productVariantService;
         private readonly IShopRepository _shopRepository;
 
-        public ProductsController(IProductService productService, IShopRepository shopRepository)
+        public ProductsController(
+            IProductService productService,
+            IProductVariantService productVariantService,
+            IShopRepository shopRepository
+        )
         {
             _productService = productService;
+            _productVariantService = productVariantService;
             _shopRepository = shopRepository;
         }
 
@@ -45,8 +51,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty)
                 return null;
-            // return await _shopRepository.GetByUserIdAsync(userId);
-            return null;
+            return await _shopRepository.GetByUserIdAsync(userId);
         }
 
         /// <summary>
@@ -154,8 +159,201 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return View(viewModel);
             }
 
-            TempData["SuccessMessage"] = "Tạo sản phẩm thành công!";
-            return RedirectToAction("Index");
+            TempData["SuccessMessage"] =
+                "Tạo sản phẩm thành công! Vui lòng thêm biến thể cho sản phẩm.";
+            return RedirectToAction("Edit", new { id = result.Data });
+        }
+
+        /// <summary>
+        /// GET /Products/Edit/{id} - Trang chỉnh sửa sản phẩm và quản lý variants
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.GetProductDetailAsync(id, shop.Id);
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Index");
+            }
+
+            var product = result.Data!;
+            var viewModel = new EditProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                BasePrice = product.BasePrice,
+                Status = product.Status,
+                ImageUrl = product.ImageUrl,
+                CategoryName = product.CategoryName,
+                CreatedAt = product.CreatedAt,
+                Variants = product
+                    .Variants.Select(v => new ProductVariantViewModel
+                    {
+                        Id = v.Id,
+                        VariantName = v.VariantName,
+                        Price = v.Price,
+                        Size = v.Size,
+                        Color = v.Color,
+                        Stock = v.Stock,
+                        Sku = v.Sku,
+                        Status = v.Status,
+                        ImageUrl = v.ImageUrl,
+                    })
+                    .ToList(),
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// GET /Products/{id}/Variants/Add - Form thêm biến thể
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> AddVariant(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.GetProductDetailAsync(id, shop.Id);
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction("Index");
+            }
+
+            var product = result.Data!;
+            if (product.Status != "draft")
+            {
+                TempData["ErrorMessage"] =
+                    "Chỉ có thể thêm biến thể khi sản phẩm ở trạng thái bản nháp.";
+                return RedirectToAction("Edit", new { id });
+            }
+
+            var viewModel = new AddVariantViewModel
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// POST /Products/{id}/Variants/Add - Xử lý thêm biến thể
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVariant(Guid id, AddVariantViewModel viewModel)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                viewModel.ProductId = id;
+                return View(viewModel);
+            }
+
+            var dto = new CreateProductVariantDto
+            {
+                ProductId = id,
+                VariantName = viewModel.VariantName,
+                Price = viewModel.Price,
+                Size = viewModel.Size,
+                Color = viewModel.Color,
+                Stock = viewModel.Stock,
+                Sku = viewModel.Sku ?? string.Empty,
+                ImageUrl = viewModel.ImageUrl,
+            };
+
+            var result = await _productVariantService.AddVariantAsync(dto, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage ?? "Không thể thêm biến thể."
+                );
+                viewModel.ProductId = id;
+                return View(viewModel);
+            }
+
+            TempData["SuccessMessage"] = "Thêm biến thể thành công!";
+            return RedirectToAction("Edit", new { id });
+        }
+
+        /// <summary>
+        /// POST /Products/Variants/{variantId}/Delete - Xóa biến thể
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVariant(Guid variantId, Guid productId)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productVariantService.DeleteVariantAsync(variantId, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Xóa biến thể thành công!";
+            }
+
+            return RedirectToAction("Edit", new { id = productId });
+        }
+
+        /// <summary>
+        /// POST /Products/{id}/Submit - Submit sản phẩm để admin duyệt
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Submit(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.SubmitProductAsync(id, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+            else
+            {
+                TempData["SuccessMessage"] =
+                    "Đã gửi sản phẩm để duyệt thành công! Vui lòng chờ admin phê duyệt.";
+            }
+
+            return RedirectToAction("Edit", new { id });
         }
 
         /// <summary>

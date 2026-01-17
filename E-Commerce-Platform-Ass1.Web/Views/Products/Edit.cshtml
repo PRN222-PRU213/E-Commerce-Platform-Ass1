@@ -1,0 +1,235 @@
+@model E_Commerce_Platform_Ass1.Web.Models.EditProductViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm";
+    Layout = "~/Views/Shared/_EShopperLayout.cshtml";
+}
+
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-10 mx-auto">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light p-3 rounded">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
+                    </li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+
+            <!-- Alert messages -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            <!-- Product Info Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-box mr-2"></i>@Model.Name
+                    </h4>
+                    <span class="badge @Model.StatusBadgeClass px-3 py-2">@Model.StatusDisplayName</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="150"><i class="fas fa-tag text-primary mr-2"></i>Danh mục:</th>
+                                    <td>@(Model.CategoryName ?? "Chưa phân loại")</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-money-bill text-primary mr-2"></i>Giá cơ bản:</th>
+                                    <td><strong class="text-danger">@Model.BasePrice.ToString("N0") ₫</strong></td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-calendar text-primary mr-2"></i>Ngày tạo:</th>
+                                    <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-align-left text-primary mr-2"></i>Mô tả:</th>
+                                    <td>@(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả" : Model.Description)</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variants Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cubes mr-2"></i>Biến thể sản phẩm (@Model.Variants.Count)
+                    </h5>
+                    @if (Model.CanAddVariant)
+                    {
+                        <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-light btn-sm">
+                            <i class="fas fa-plus mr-1"></i>Thêm biến thể
+                        </a>
+                    }
+                </div>
+                <div class="card-body">
+                    @if (Model.Variants.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Tên biến thể</th>
+                                        <th>SKU</th>
+                                        <th>Kích thước</th>
+                                        <th>Màu sắc</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        @if (Model.Status == "draft")
+                                        {
+                                            <th class="text-center">Thao tác</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var variant in Model.Variants)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@variant.VariantName</strong>
+                                            </td>
+                                            <td><code>@(string.IsNullOrEmpty(variant.Sku) ? "-" : variant.Sku)</code></td>
+                                            <td>@(string.IsNullOrEmpty(variant.Size) ? "-" : variant.Size)</td>
+                                            <td>@(string.IsNullOrEmpty(variant.Color) ? "-" : variant.Color)</td>
+                                            <td><strong class="text-danger">@variant.Price.ToString("N0") ₫</strong></td>
+                                            <td>
+                                                @if (variant.Stock > 10)
+                                                {
+                                                    <span class="badge badge-success">@variant.Stock</span>
+                                                }
+                                                else if (variant.Stock > 0)
+                                                {
+                                                    <span class="badge badge-warning">@variant.Stock</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Hết hàng</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(variant.Status == "active" ? "badge-success" : "badge-secondary")">
+                                                    @(variant.Status == "active" ? "Hoạt động" : variant.Status)
+                                                </span>
+                                            </td>
+                                            @if (Model.Status == "draft")
+                                            {
+                                                <td class="text-center">
+                                                    <form asp-action="DeleteVariant" method="post" class="d-inline"
+                                                          onsubmit="return confirm('Bạn có chắc muốn xóa biến thể này?');">
+                                                        <input type="hidden" name="variantId" value="@variant.Id" />
+                                                        <input type="hidden" name="productId" value="@Model.Id" />
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-cubes fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Chưa có biến thể nào.</p>
+                            @if (Model.CanAddVariant)
+                            {
+                                <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <i class="fas fa-plus mr-2"></i>Thêm biến thể đầu tiên
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>Quay lại danh sách
+                        </a>
+                        
+                        <div>
+                            @if (Model.Status == "draft")
+                            {
+                                @if (Model.CanSubmit)
+                                {
+                                    <form asp-action="Submit" asp-route-id="@Model.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc muốn gửi sản phẩm này để duyệt? Sau khi gửi, bạn sẽ không thể chỉnh sửa cho đến khi được duyệt.');">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-paper-plane mr-2"></i>Gửi duyệt
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-success" disabled title="Cần thêm ít nhất 1 biến thể">
+                                        <i class="fas fa-paper-plane mr-2"></i>Gửi duyệt
+                                    </button>
+                                    <small class="text-muted ml-2">
+                                        <i class="fas fa-info-circle"></i> Cần thêm ít nhất 1 biến thể để gửi duyệt
+                                    </small>
+                                }
+                            }
+                            else if (Model.Status == "pending")
+                            {
+                                <span class="text-info">
+                                    <i class="fas fa-clock mr-2"></i>Đang chờ admin duyệt...
+                                </span>
+                            }
+                            else if (Model.Status == "active")
+                            {
+                                <span class="text-success">
+                                    <i class="fas fa-check-circle mr-2"></i>Sản phẩm đang được bán
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

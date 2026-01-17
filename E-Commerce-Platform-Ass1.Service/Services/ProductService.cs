@@ -12,16 +12,19 @@ namespace E_Commerce_Platform_Ass1.Service.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IProductVariantRepository _productVariantRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IShopRepository _shopRepository;
 
         public ProductService(
             IProductRepository productRepository,
+            IProductVariantRepository productVariantRepository,
             ICategoryRepository categoryRepository,
             IShopRepository shopRepository
         )
         {
             _productRepository = productRepository;
+            _productVariantRepository = productVariantRepository;
             _categoryRepository = categoryRepository;
             _shopRepository = shopRepository;
         }
@@ -66,7 +69,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Name = dto.Name.Trim(),
                 Description = dto.Description?.Trim() ?? string.Empty,
                 BasePrice = dto.BasePrice,
-                Status = "active", // Mặc định active khi tạo
+                Status = "draft", // Mặc định draft khi tạo, chờ shop submit và admin duyệt
                 AvgRating = 0,
                 ImageUrl = dto.ImageUrl?.Trim() ?? string.Empty,
                 CreatedAt = DateTime.UtcNow,
@@ -118,6 +121,103 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return categories.Select(c => new CategoryDto { Id = c.Id, Name = c.Name }).ToList();
         }
 
+        /// <summary>
+        /// Lấy chi tiết sản phẩm bao gồm variants (dùng cho trang Edit)
+        /// </summary>
+        public async Task<ServiceResult<ProductDetailDto>> GetProductDetailAsync(
+            Guid productId,
+            Guid shopId
+        )
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult<ProductDetailDto>.Failure("Sản phẩm không tồn tại.");
+            }
+
+            // Kiểm tra product thuộc shop của user
+            if (product.ShopId != shopId)
+            {
+                return ServiceResult<ProductDetailDto>.Failure(
+                    "Bạn không có quyền truy cập sản phẩm này."
+                );
+            }
+
+            var variants = await _productVariantRepository.GetByProductIdAsync(productId);
+            var category = await _categoryRepository.GetByIdAsync(product.CategoryId);
+            var shop = await _shopRepository.GetByIdAsync(product.ShopId);
+
+            var dto = new ProductDetailDto
+            {
+                Id = product.Id,
+                ShopId = product.ShopId,
+                CategoryId = product.CategoryId,
+                Name = product.Name,
+                Description = product.Description,
+                BasePrice = product.BasePrice,
+                Status = product.Status,
+                AvgRating = product.AvgRating,
+                ImageUrl = product.ImageUrl,
+                CreatedAt = product.CreatedAt,
+                CategoryName = category?.Name,
+                ShopName = shop?.ShopName,
+                Variants = variants
+                    .Select(v => new ProductVariantDto
+                    {
+                        Id = v.Id,
+                        ProductId = v.ProductId,
+                        VariantName = v.VariantName,
+                        Price = v.Price,
+                        Size = v.Size,
+                        Color = v.Color,
+                        Stock = v.Stock,
+                        Sku = v.Sku,
+                        Status = v.Status,
+                        ImageUrl = v.ImageUrl,
+                    })
+                    .ToList(),
+            };
+
+            return ServiceResult<ProductDetailDto>.Success(dto);
+        }
+
+        /// <summary>
+        /// Submit sản phẩm để admin duyệt (chuyển từ draft sang pending)
+        /// </summary>
+        public async Task<ServiceResult> SubmitProductAsync(Guid productId, Guid shopId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return ServiceResult.Failure("Sản phẩm không tồn tại.");
+            }
+
+            if (product.ShopId != shopId)
+            {
+                return ServiceResult.Failure("Bạn không có quyền submit sản phẩm này.");
+            }
+
+            if (product.Status != "draft")
+            {
+                return ServiceResult.Failure("Chỉ có thể submit sản phẩm ở trạng thái bản nháp.");
+            }
+
+            // Kiểm tra phải có ít nhất 1 variant
+            var variants = await _productVariantRepository.GetByProductIdAsync(productId);
+            if (!variants.Any())
+            {
+                return ServiceResult.Failure(
+                    "Sản phẩm phải có ít nhất 1 biến thể trước khi submit."
+                );
+            }
+
+            // Chuyển trạng thái sang pending để admin duyệt
+            product.Status = "pending";
+            await _productRepository.UpdateAsync(product);
+
+            return ServiceResult.Success();
+        }
+
         private static ProductDto MapToDto(Product product, string? shopName = null)
         {
             return new ProductDto
@@ -135,7 +235,5 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ShopName = shopName,
             };
         }
-
-        // #endregion
     }
 }

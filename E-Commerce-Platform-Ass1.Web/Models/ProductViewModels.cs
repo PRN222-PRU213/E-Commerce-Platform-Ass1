@@ -82,5 +82,105 @@ namespace E_Commerce_Platform_Ass1.Web.Models
         public int TotalProducts => Products.Count;
         public int ActiveCount => Products.Count(p => p.Status == "active");
         public int InactiveCount => Products.Count(p => p.Status == "inactive");
+        public int DraftCount => Products.Count(p => p.Status == "draft");
+        public int PendingCount => Products.Count(p => p.Status == "pending");
+    }
+
+    /// <summary>
+    /// ViewModel cho biến thể sản phẩm trong trang Edit
+    /// </summary>
+    public class ProductVariantViewModel
+    {
+        public Guid Id { get; set; }
+        public string VariantName { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string? Size { get; set; }
+        public string? Color { get; set; }
+        public int Stock { get; set; }
+        public string Sku { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+    }
+
+    /// <summary>
+    /// ViewModel cho trang Edit sản phẩm (bao gồm variants)
+    /// </summary>
+    public class EditProductViewModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal BasePrice { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public string? CategoryName { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public List<ProductVariantViewModel> Variants { get; set; } = new();
+
+        // Helper properties
+        public bool CanSubmit => Status == "draft" && Variants.Any();
+        public bool CanAddVariant => Status == "draft";
+
+        public string StatusBadgeClass =>
+            Status switch
+            {
+                "active" => "badge-success",
+                "inactive" => "badge-secondary",
+                "draft" => "badge-warning",
+                "pending" => "badge-info",
+                _ => "badge-secondary",
+            };
+
+        public string StatusDisplayName =>
+            Status switch
+            {
+                "active" => "Đang bán",
+                "inactive" => "Ngừng bán",
+                "draft" => "Bản nháp",
+                "pending" => "Chờ duyệt",
+                _ => Status,
+            };
+    }
+
+    /// <summary>
+    /// ViewModel cho form thêm biến thể sản phẩm
+    /// </summary>
+    public class AddVariantViewModel
+    {
+        public Guid ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Tên biến thể là bắt buộc.")]
+        [StringLength(200, ErrorMessage = "Tên biến thể không được vượt quá {1} ký tự.")]
+        [Display(Name = "Tên biến thể")]
+        public string VariantName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Giá là bắt buộc.")]
+        [Range(0, double.MaxValue, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0.")]
+        [Display(Name = "Giá (₫)")]
+        public decimal Price { get; set; }
+
+        [StringLength(50, ErrorMessage = "Kích thước không được vượt quá {1} ký tự.")]
+        [Display(Name = "Kích thước")]
+        public string? Size { get; set; }
+
+        [StringLength(50, ErrorMessage = "Màu sắc không được vượt quá {1} ký tự.")]
+        [Display(Name = "Màu sắc")]
+        public string? Color { get; set; }
+
+        [Required(ErrorMessage = "Số lượng tồn kho là bắt buộc.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0.")]
+        [Display(Name = "Tồn kho")]
+        public int Stock { get; set; }
+
+        [StringLength(100, ErrorMessage = "SKU không được vượt quá {1} ký tự.")]
+        [Display(Name = "SKU")]
+        public string? Sku { get; set; }
+
+        [StringLength(500, ErrorMessage = "URL hình ảnh không được vượt quá {1} ký tự.")]
+        [Display(Name = "Link hình ảnh")]
+        [Url(ErrorMessage = "URL không hợp lệ.")]
+        public string? ImageUrl { get; set; }
     }
 }
