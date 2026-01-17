@@ -17,7 +17,8 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public ProductService(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
-            IShopRepository shopRepository)
+            IShopRepository shopRepository
+        )
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
@@ -67,7 +68,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Status = "active", // Mặc định active khi tạo
                 AvgRating = 0,
                 ImageUrl = dto.ImageUrl?.Trim() ?? string.Empty,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _productRepository.AddAsync(product);
@@ -113,11 +114,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public async Task<List<CategoryDto>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            return categories.Select(c => new CategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name
-            }).ToList();
+            return categories.Select(c => new CategoryDto { Id = c.Id, Name = c.Name }).ToList();
         }
 
         // #region Private Helpers
@@ -136,7 +133,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 AvgRating = product.AvgRating,
                 ImageUrl = product.ImageUrl,
                 CreatedAt = product.CreatedAt,
-                ShopName = shopName
+                ShopName = shopName,
             };
         }
 

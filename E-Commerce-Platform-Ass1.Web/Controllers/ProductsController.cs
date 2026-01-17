@@ -23,8 +23,6 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             _shopRepository = shopRepository;
         }
 
-        // #region Helper Methods
-
         /// <summary>
         /// Lấy UserId từ Claims
         /// </summary>
