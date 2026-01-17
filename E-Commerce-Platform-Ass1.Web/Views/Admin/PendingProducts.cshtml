@@ -1,7 +1,7 @@
 @model List<E_Commerce_Platform_Ass1.Service.DTOs.ProductDto>
 @{
     ViewData["Title"] = "Sản phẩm chờ duyệt";
-    Layout = "_Layout";
+    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-4">
@@ -33,12 +33,26 @@
         </div>
     }
 
-    <div class="card shadow">
-        <div class="card-header py-3 bg-warning">
-            <h6 class="m-0 font-weight-bold text-dark">
-                <i class="fas fa-hourglass-half"></i> Danh sách sản phẩm chờ duyệt (@Model.Count)
-            </h6>
+    <!-- Search Bar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="m-0 text-warning">
+                        <i class="fas fa-hourglass-half"></i> Danh sách sản phẩm chờ duyệt (@Model.Count)
+                    </h6>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="searchPending" class="form-control" placeholder="Tìm theo tên sản phẩm hoặc shop...">
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="card">
         <div class="card-body">
             @if (Model.Any())
             {
@@ -167,6 +181,7 @@
 
 @section Scripts {
     <script>
+        // Reject modal handling
         var rejectModal = document.getElementById('rejectModal');
         rejectModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -175,6 +190,23 @@
             
             document.getElementById('productNameText').textContent = productName;
             document.getElementById('rejectForm').action = '@Url.Action("RejectProduct")' + '?id=' + productId;
+        });
+
+        // Search functionality
+        document.getElementById('searchPending').addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const productName = row.cells[2]?.textContent.toLowerCase() || '';
+                const shopName = row.cells[3]?.textContent.toLowerCase() || '';
+                
+                if (productName.includes(searchText) || shopName.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
     </script>
 }

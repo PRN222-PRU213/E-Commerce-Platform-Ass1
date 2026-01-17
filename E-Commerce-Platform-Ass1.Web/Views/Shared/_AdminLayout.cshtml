@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-bg: #1a1d2e;
+            --sidebar-hover: #2d3250;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+        }
+
+        .sidebar-brand h4 {
+            color: #fff;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .sidebar-brand small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-header {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 1.5rem 0.5rem;
+        }
+
+        .sidebar-menu .nav-link {
+            color: #cbd5e1;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu .nav-link.active {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-menu .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-menu .badge {
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .admin-main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* Top Navbar */
+        .admin-topbar {
+            background: #fff;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-topbar .breadcrumb {
+            margin: 0;
+            background: none;
+            padding: 0;
+        }
+
+        .user-dropdown .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #334155;
+        }
+
+        .user-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Content Area */
+        .admin-content {
+            padding: 1.5rem;
+        }
+
+        /* Cards - Clean flat design */
+        .stat-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            border: none;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Remove shadows and borders globally in admin */
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .table {
+            border: none !important;
+        }
+
+        .table-bordered {
+            border: none !important;
+        }
+
+        .table-bordered td, .table-bordered th {
+            border: none !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        /* Responsive */
+        @@media (max-width: 991.98px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                margin-left: 0;
+            }
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+            <h4><i class="fas fa-shield-alt text-primary"></i> Admin Panel</h4>
+            <small>E-Commerce Platform</small>
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-header">Tổng quan</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" 
+                       asp-controller="Admin" asp-action="Index">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="menu-header">Quản lý Shop</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Shops" ? "active" : "")" 
+                       asp-controller="Admin" asp-action="Shops">
+                        <i class="fas fa-store"></i>
+                        <span>Tất cả Shop</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Admin" asp-action="Shops" asp-route-status="Pending">
+                        <i class="fas fa-hourglass-half"></i>
+                        <span>Shop chờ duyệt</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="menu-header">Quản lý Sản phẩm</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AllProducts" ? "active" : "")" 
+                       asp-controller="Admin" asp-action="AllProducts">
+                        <i class="fas fa-box"></i>
+                        <span>Tất cả sản phẩm</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "PendingProducts" ? "active" : "")" 
+                       asp-controller="Admin" asp-action="PendingProducts">
+                        <i class="fas fa-clock"></i>
+                        <span>Chờ duyệt</span>
+                        <span class="badge bg-warning text-dark">Mới</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="menu-header">Khác</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-globe"></i>
+                        <span>Về trang chủ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form asp-controller="Authentication" asp-action="Logout" method="post" class="d-inline w-100">
+                        <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Top Navbar -->
+        <header class="admin-topbar">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Admin")">Admin</a></li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+
+            <div class="user-dropdown dropdown">
+                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <div class="user-avatar">
+                        @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+                    </div>
+                    <span>@User.Identity?.Name</span>
+                    <i class="fas fa-chevron-down ms-1" style="font-size: 0.7rem;"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" asp-controller="Home" asp-action="Index"><i class="fas fa-home me-2"></i>Trang chủ</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form asp-controller="Authentication" asp-action="Logout" method="post">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="admin-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

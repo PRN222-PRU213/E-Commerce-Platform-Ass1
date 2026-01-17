@@ -1,7 +1,7 @@
 @model List<E_Commerce_Platform_Ass1.Service.DTOs.ShopDto>
 @{
     ViewData["Title"] = "Quản lý Shop";
-    Layout = "_Layout";
+    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-4">
@@ -28,25 +28,35 @@
         </div>
     }
 
-    <!-- Filter Buttons -->
-    <div class="card shadow mb-4">
+    <!-- Filter and Search -->
+    <div class="card mb-4">
         <div class="card-body">
-            <div class="btn-group" role="group">
-                <a asp-action="Shops" class="btn @(ViewBag.CurrentStatus == null ? "btn-primary" : "btn-outline-primary")">
-                    Tất cả (@Model.Count)
-                </a>
-                <a asp-action="Shops" asp-route-status="Active" 
-                   class="btn @(ViewBag.CurrentStatus == "Active" ? "btn-success" : "btn-outline-success")">
-                    <i class="fas fa-check-circle"></i> Hoạt động (@Model.Count(s => s.Status == "Active"))
-                </a>
-                <a asp-action="Shops" asp-route-status="Pending" 
-                   class="btn @(ViewBag.CurrentStatus == "Pending" ? "btn-warning" : "btn-outline-warning")">
-                    <i class="fas fa-clock"></i> Chờ duyệt (@Model.Count(s => s.Status == "Pending"))
-                </a>
-                <a asp-action="Shops" asp-route-status="Inactive" 
-                   class="btn @(ViewBag.CurrentStatus == "Inactive" ? "btn-secondary" : "btn-outline-secondary")">
-                    <i class="fas fa-ban"></i> Không hoạt động (@Model.Count(s => s.Status == "Inactive"))
-                </a>
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="btn-group" role="group">
+                        <a asp-action="Shops" class="btn @(ViewBag.CurrentStatus == null ? "btn-primary" : "btn-outline-primary")">
+                            Tất cả (@Model.Count)
+                        </a>
+                        <a asp-action="Shops" asp-route-status="Active" 
+                           class="btn @(ViewBag.CurrentStatus == "Active" ? "btn-success" : "btn-outline-success")">
+                            <i class="fas fa-check-circle"></i> Hoạt động
+                        </a>
+                        <a asp-action="Shops" asp-route-status="Pending" 
+                           class="btn @(ViewBag.CurrentStatus == "Pending" ? "btn-warning" : "btn-outline-warning")">
+                            <i class="fas fa-clock"></i> Chờ duyệt
+                        </a>
+                        <a asp-action="Shops" asp-route-status="Inactive" 
+                           class="btn @(ViewBag.CurrentStatus == "Inactive" ? "btn-secondary" : "btn-outline-secondary")">
+                            <i class="fas fa-ban"></i> Không hoạt động
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="searchShop" class="form-control" placeholder="Tìm theo tên shop hoặc chủ shop...">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -155,3 +165,24 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchShop').addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const shopName = row.cells[1]?.textContent.toLowerCase() || '';
+                const ownerName = row.cells[2]?.textContent.toLowerCase() || '';
+                const email = row.cells[3]?.textContent.toLowerCase() || '';
+                
+                if (shopName.includes(searchText) || ownerName.includes(searchText) || email.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}
