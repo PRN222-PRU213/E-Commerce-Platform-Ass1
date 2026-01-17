@@ -18,6 +18,22 @@
 </div>
 <!-- Page Header End -->
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <!-- Shop Detail Start -->
 <div class="container-fluid py-5">
     <div class="row px-xl-5">
@@ -105,22 +121,27 @@
                 }
             }
 
-            <div class="d-flex align-items-center mb-4 pt-2">
-                <div class="input-group quantity mr-3" style="width: 130px;">
-                    <div class="input-group-btn">
-                        <button class="btn btn-primary btn-minus" >
-                        <i class="fa fa-minus"></i>
-                        </button>
+            <form asp-controller="Cart" asp-action="AddToCart" method="post" id="add-to-cart-form">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <input type="hidden" name="productVariantId" id="selected-variant-id" value="" />
+                
+                <div class="d-flex align-items-center mb-4 pt-2">
+                    <div class="input-group quantity mr-3" style="width: 130px;">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-primary btn-minus" >
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                        <input type="text" name="quantity" class="form-control bg-secondary text-center" value="1">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-primary btn-plus">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
-                    <input type="text" class="form-control bg-secondary text-center" value="1">
-                    <div class="input-group-btn">
-                        <button class="btn btn-primary btn-plus">
-                            <i class="fa fa-plus"></i>
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button>
                 </div>
-                <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To Cart</button>
-            </div>
+            </form>
             <div class="d-flex pt-2">
                 <p class="text-dark font-weight-medium mb-0 mr-2">Share on:</p>
                 <div class="d-inline-flex">
@@ -253,7 +274,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            var variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProductVariants.Select(v => new { v.Size, v.Color, v.Price })));
+            var variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProductVariants.Select(v => new { v.Id, v.Size, v.Color, v.Price })));
             
             $('.variant-selector').change(function () {
                 var selectedSize = $('input[name="size"]:checked').val() || "";
@@ -262,11 +283,21 @@
                 var variant = variants.find(v => v.Size == selectedSize && v.Color == selectedColor);
                 if (variant) {
                     $('.font-weight-semi-bold.mb-4').first().text('$' + variant.Price.toFixed(2));
+                    $('#selected-variant-id').val(variant.Id);
                 } else if (selectedSize || selectedColor) {
                     var partialMatch = variants.find(v => (selectedSize && v.Size == selectedSize) || (selectedColor && v.Color == selectedColor));
                     if (partialMatch) {
                         $('.font-weight-semi-bold.mb-4').first().text('$' + partialMatch.Price.toFixed(2));
+                        $('#selected-variant-id').val(partialMatch.Id);
                     }
+                }
+            });
+
+            $('#add-to-cart-form').submit(function (e) {
+                var variantId = $('#selected-variant-id').val();
+                if (!variantId && @(Model.ProductVariants.Any() ? "true" : "false")) {
+                    alert('Vui lòng chọn Size hoặc Màu sắc sản phẩm.');
+                    e.preventDefault();
                 }
             });
         });
