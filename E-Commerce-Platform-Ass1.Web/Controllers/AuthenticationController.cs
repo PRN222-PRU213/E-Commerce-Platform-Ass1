@@ -105,6 +105,29 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            return View(user);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()

@@ -30,7 +30,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var userRole = await _roleRepository.GetByNameAsync("Customer");
             if (userRole == null)
             {
-                throw new InvalidOperationException("Default 'User' role not found. Please seed roles first.");
+                throw new InvalidOperationException("Default 'Customer' role not found. Please seed roles first.");
             }
 
             var user = new User
@@ -57,6 +57,23 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             if (!VerifyPassword(password, user.PasswordHash))
+            {
+                return null;
+            }
+
+            return new AuthenticatedUser
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role?.Name ?? "Unknown"
+            };
+        }
+
+        public async Task<AuthenticatedUser?> GetUserByIdAsync(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
             {
                 return null;
             }
