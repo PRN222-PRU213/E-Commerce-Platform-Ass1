@@ -152,3 +152,43 @@ body {
     min-width: 250px;
   }
 }
+
+/* Dashboard Styles */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.product-item .card {
+  transition: all 0.3s ease;
+}
+
+.product-item:hover .card {
+  transform: translateY(-8px);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.filter-btn.active {
+  background-color: #D19C97;
+  border-color: #D19C97;
+  color: white;
+}
+
+.filter-btn:hover:not(.active) {
+  background-color: #f8f9fa;
+  border-color: #D19C97;
+  color: #D19C97;
+}
+
+.product-action {
+  transition: opacity 0.3s ease;
+}
+
+.badge-lg {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
