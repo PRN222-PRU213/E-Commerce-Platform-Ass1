@@ -1,4 +1,4 @@
-// Quantity increase/decrease functionality
+    // Quantity increase/decrease functionality
 $(document).ready(function() {
     // Increase quantity
     $('.btn-plus').on('click', function(e) {

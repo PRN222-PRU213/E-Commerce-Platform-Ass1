@@ -1,23 +1,44 @@
 @model E_Commerce_Platform_Ass1.Data.Database.Entities.Shop
+@using E_Commerce_Platform_Ass1.Service.DTOs
 @{
     ViewData["Title"] = "Thông tin shop";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var products = ViewBag.Products as List<ProductDto> ?? new List<ProductDto>();
 }
+
+<!-- Page Header Start -->
+<div class="container-fluid bg-secondary mb-5">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 200px">
+        <h1 class="font-weight-semi-bold text-uppercase mb-3">
+            <i class="fas fa-store text-primary mr-2"></i>@Model.ShopName
+        </h1>
+        <div class="d-inline-flex">
+            <p class="m-0"><a asp-controller="Authentication" asp-action="Profile">Hồ sơ</a></p>
+            <p class="m-0 px-2">-</p>
+            <p class="m-0">Thông tin shop</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
 
 <!-- Shop Info Start -->
 <div class="container-fluid py-5">
     <div class="row px-xl-5">
-        <div class="col-lg-10 offset-lg-1">
+        <!-- Shop Information Section -->
+        <div class="col-lg-12 mb-5">
             <div class="bg-light p-5 rounded shadow-sm">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div>
-                        <h2 class="font-weight-semi-bold mb-2">
-                            <i class="fas fa-store text-primary mr-2"></i>@Model.ShopName
-                        </h2>
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-calendar-alt text-primary mr-2"></i>
-                            Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                        </p>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mr-4" style="width: 100px; height: 100px;">
+                            <i class="fas fa-store text-white" style="font-size: 3rem;"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-weight-semi-bold mb-2">@Model.ShopName</h2>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-calendar-alt text-primary mr-2"></i>
+                                Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
                     </div>
                     <div>
                         @if (Model.Status == "Pending")
@@ -106,11 +127,103 @@
                     <a asp-controller="Authentication" asp-action="Profile" class="btn btn-outline-primary">
                         <i class="fas fa-arrow-left mr-2"></i>Quay lại hồ sơ
                     </a>
-                    <a href="#" class="btn btn-primary ml-2">
-                        <i class="fas fa-edit mr-2"></i>Chỉnh sửa shop
-                    </a>
+                    @if (Model.Status == "Active")
+                    {
+                        <a asp-controller="Shop" asp-action="Detail" asp-route-id="@Model.Id" class="btn btn-primary ml-2" target="_blank">
+                            <i class="fas fa-external-link-alt mr-2"></i>Xem shop công khai
+                        </a>
+                    }
                 </div>
             </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="font-weight-semi-bold">
+                    <i class="fas fa-box text-primary mr-2"></i>Sản phẩm của shop (@products.Count)
+                </h3>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>Thêm sản phẩm
+                </a>
+            </div>
+
+            @if (products.Any())
+            {
+                <div class="row">
+                    @foreach (var product in products)
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
+                            <div class="product-item bg-light mb-4">
+                                <div class="product-img position-relative overflow-hidden">
+                                    <img class="img-fluid w-100" src="@(!string.IsNullOrEmpty(product.ImageUrl) ? product.ImageUrl : "~/img/product-1.jpg")" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                                    <div class="product-action">
+                                        <a class="btn btn-outline-dark btn-square" href="#"><i class="fa fa-edit"></i></a>
+                                        <a class="btn btn-outline-dark btn-square" href="#"><i class="fa fa-trash"></i></a>
+                                        <a class="btn btn-outline-dark btn-square" href="#"><i class="fa fa-eye"></i></a>
+                                    </div>
+                                    <!-- Status Badge -->
+                                    <div class="position-absolute top-0 right-0 m-2">
+                                        @if (product.Status == "Active")
+                                        {
+                                            <span class="badge badge-success">Active</span>
+                                        }
+                                        else if (product.Status == "Pending")
+                                        {
+                                            <span class="badge badge-warning">Pending</span>
+                                        }
+                                        else if (product.Status == "Draft")
+                                        {
+                                            <span class="badge badge-secondary">Draft</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">@product.Status</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="text-center py-4">
+                                    <a class="h6 text-decoration-none text-truncate d-block" href="#">@product.Name</a>
+                                    <div class="d-flex align-items-center justify-content-center mt-2">
+                                        <h5 class="text-primary mr-2">$@product.BasePrice.ToString("F2")</h5>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-center mb-1">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Round(product.AvgRating))
+                                            {
+                                                <small class="fa fa-star text-primary mr-1"></small>
+                                            }
+                                            else
+                                            {
+                                                <small class="far fa-star text-primary mr-1"></small>
+                                            }
+                                        }
+                                        <small>(@product.AvgRating.ToString("F1"))</small>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(product.CategoryName))
+                                    {
+                                        <small class="text-muted">
+                                            <i class="fas fa-tag mr-1"></i>@product.CategoryName
+                                        </small>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-light rounded">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có sản phẩm nào</h5>
+                    <p class="text-muted mb-4">Bắt đầu thêm sản phẩm đầu tiên cho shop của bạn.</p>
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Thêm sản phẩm đầu tiên
+                    </a>
+                </div>
+            }
         </div>
     </div>
 </div>

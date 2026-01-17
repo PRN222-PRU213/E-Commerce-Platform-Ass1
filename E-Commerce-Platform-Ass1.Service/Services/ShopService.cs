@@ -20,6 +20,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return await _shopRepository.GetByUserIdAsync(userId);
         }
 
+        public async Task<Shop?> GetShopByIdAsync(Guid shopId)
+        {
+            return await _shopRepository.GetByIdAsync(shopId);
+        }
+
         public async Task<bool> UserHasShopAsync(Guid userId)
         {
             return await _shopRepository.ExistsByUserId(userId);

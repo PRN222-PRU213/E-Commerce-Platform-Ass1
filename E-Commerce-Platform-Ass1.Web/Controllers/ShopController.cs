@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -8,16 +11,44 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce_Platform_Ass1.Web.Controllers
 {
-    [Authorize]
     public class ShopController : Controller
     {
         private readonly IShopService _shopService;
+        private readonly IProductService _productService;
 
-        public ShopController(IShopService shopService)
+        public ShopController(IShopService shopService, IProductService productService)
         {
             _shopService = shopService;
+            _productService = productService;
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            var shop = await _shopService.GetShopByIdAsync(id);
+            if (shop == null)
+            {
+                return NotFound();
+            }
+
+            // Chỉ hiển thị shop đã được duyệt (Active)
+            if (shop.Status != "Active")
+            {
+                return NotFound();
+            }
+
+            // Lấy danh sách sản phẩm của shop (chỉ sản phẩm đã được duyệt)
+            var productsResult = await _productService.GetByShopIdAsync(id);
+            var products = productsResult.IsSuccess && productsResult.Data != null 
+                ? productsResult.Data.Where(p => p.Status == "Active").ToList() 
+                : new List<ProductDto>();
+
+            ViewBag.Products = products;
+            return View(shop);
+        }
+
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> RegisterShop()
         {
@@ -38,6 +69,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterShop(RegisterShopViewModel model)
@@ -76,6 +108,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             return RedirectToAction("Profile", "Authentication");
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> ViewShop()
         {
@@ -92,6 +125,13 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("RegisterShop");
             }
 
+            // Lấy toàn bộ sản phẩm của shop (tất cả status vì đây là trang quản lý)
+            var productsResult = await _productService.GetByShopIdAsync(shop.Id);
+            var products = productsResult.IsSuccess && productsResult.Data != null 
+                ? productsResult.Data.ToList() 
+                : new List<ProductDto>();
+
+            ViewBag.Products = products;
             return View(shop);
         }
     }
