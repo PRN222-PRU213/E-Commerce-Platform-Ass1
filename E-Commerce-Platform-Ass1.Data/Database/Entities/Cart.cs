@@ -14,5 +14,13 @@
         public User User { get; set; } = null!;
 
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
+        public Cart(Guid id, Guid userId)
+        {
+            Id = id;
+            UserId = userId;
+            Status = "ACTIVE";
+            CreatedAt = DateTime.Now;
+        }
     }
 }

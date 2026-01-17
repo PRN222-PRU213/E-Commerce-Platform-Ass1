@@ -27,7 +27,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Get default "User" role
-            var userRole = await _roleRepository.GetByNameAsync("Customer");
+            var userRole = await _roleRepository.GetByNameAsync("User");
             if (userRole == null)
             {
                 throw new InvalidOperationException("Default 'Customer' role not found. Please seed roles first.");

@@ -1,3 +1,4 @@
+using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
 
@@ -13,6 +14,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         /// </summary>
         Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto);
 
+        Task<List<Product>> GetAllProductAsync();
+
+        Task<Product?> GetProductWithVariantsAsync(Guid productId);
         /// <summary>
         /// Lấy danh sách sản phẩm theo ShopId
         /// </summary>

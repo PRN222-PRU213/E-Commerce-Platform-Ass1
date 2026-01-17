@@ -1,14 +1,12 @@
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
-using E_Commerce_Platform_Ass1.Service.Services.IServices;
+
 
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
-    /// <summary>
-    /// Service xử lý nghiệp vụ sản phẩm
-    /// </summary>
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
@@ -29,9 +27,18 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             _shopRepository = shopRepository;
         }
 
-        /// <summary>
-        /// Tạo sản phẩm mới
-        /// </summary>
+        public async Task<List<Product>> GetAllProductAsync()
+        {
+            var products = await _productRepository.GetAllAsync();
+            return products.ToList();
+        }
+
+        public async Task<Product?> GetProductWithVariantsAsync(Guid productId)
+        {
+            var product = await _productRepository.GetProductWithVariantsAsync(productId);
+            return product;
+        }
+
         public async Task<ServiceResult<Guid>> CreateProductAsync(CreateProductDto dto)
         {
             // Validate Shop exists

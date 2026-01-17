@@ -16,5 +16,14 @@
         public Cart Cart { get; set; } = null!;
 
         public ProductVariant ProductVariant { get; set; } = null!;
+
+        public CartItem(Guid id, Guid cartId, Guid productVariantId, int quantity)
+        {
+            Id = id;
+            CartId = cartId;
+            ProductVariantId = productVariantId;
+            Quantity = quantity;
+            CreatedAt = DateTime.Now;
+        }
     }
 }

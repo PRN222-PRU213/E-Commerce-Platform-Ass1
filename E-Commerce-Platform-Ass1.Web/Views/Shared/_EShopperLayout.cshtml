@@ -75,14 +75,27 @@
                     </div>
                 </form>
             </div>
+@using E_Commerce_Platform_Ass1.Service.Services.IServices
+@using System.Security.Claims
+@inject ICartService CartService
+
+@{
+    int cartCount = 0;
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+    {
+        cartCount = await CartService.GetTotalItemCountAsync(userId);
+    }
+}
+
             <div class="col-lg-3 col-6 text-right">
                 <a href="" class="btn border">
                     <i class="fas fa-heart text-primary"></i>
                     <span class="badge">0</span>
                 </a>
-                <a href="" class="btn border">
+                <a asp-controller="Cart" asp-action="Index" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge">0</span>
+                    <span class="badge">@cartCount</span>
                 </a>
             </div>
         </div>
