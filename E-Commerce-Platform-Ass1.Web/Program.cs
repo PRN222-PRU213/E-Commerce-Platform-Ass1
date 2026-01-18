@@ -1,9 +1,6 @@
 using E_Commerce_Platform_Ass1.Data.Database;
-using E_Commerce_Platform_Ass1.Data.Repositories;
-using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.Common.Configurations;
-using E_Commerce_Platform_Ass1.Service.Services;
-using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,23 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
-// DI for repositories & services
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IShopRepository, ShopRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepostitory>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IShopService, ShopService>();
-builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
-builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddService();
 
 var app = builder.Build();
 
