@@ -154,16 +154,29 @@
             background: #fff;
             border-radius: 0.75rem;
             border: none;
-            transition: transform 0.2s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
+        /* Remove all hover effects on cards in admin */
+        .card,
+        .card:hover,
+        .card:focus,
+        .card:active {
+            transition: none !important;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
-        /* Remove shadows and borders globally in admin */
-        .card {
-            border: none !important;
+        /* Remove border-left color effects */
+        .border-left-primary,
+        .border-left-success,
+        .border-left-warning,
+        .border-left-danger,
+        .border-left-info {
+            border-left: none !important;
+        }
+
+        /* Remove shadow class effect */
+        .shadow {
             box-shadow: none !important;
         }
 

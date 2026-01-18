@@ -50,10 +50,6 @@
                            class="btn @(ViewBag.CurrentStatus == "pending" ? "btn-warning" : "btn-outline-warning")">
                             <i class="fas fa-clock"></i> Chờ duyệt
                         </a>
-                        <a asp-action="AllProducts" asp-route-status="draft" 
-                           class="btn @(ViewBag.CurrentStatus == "draft" ? "btn-secondary" : "btn-outline-secondary")">
-                            <i class="fas fa-edit"></i> Nháp
-                        </a>
                         <a asp-action="AllProducts" asp-route-status="rejected" 
                            class="btn @(ViewBag.CurrentStatus == "rejected" ? "btn-danger" : "btn-outline-danger")">
                             <i class="fas fa-times-circle"></i> Bị từ chối

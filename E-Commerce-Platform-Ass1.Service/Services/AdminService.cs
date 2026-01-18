@@ -174,7 +174,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
         public async Task<ServiceResult<List<ProductDto>>> GetAllProductsAsync()
         {
-            var products = await _productRepository.GetAllAsync();
+            var allProducts = await _productRepository.GetAllAsync();
+            // Admin chỉ thấy sản phẩm đã submit (không thấy draft)
+            var products = allProducts.Where(p => p.Status != "draft");
             var productDtos = new List<ProductDto>();
 
             foreach (var product in products)

@@ -2,7 +2,6 @@ using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
 
-
 namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
     /// <summary>
