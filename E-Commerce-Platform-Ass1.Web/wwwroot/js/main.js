@@ -1,11 +1,12 @@
 (function ($) {
     "use strict";
     
-    // Dropdown on mouse hover
+    // Dropdown on mouse hover (exclude user profile dropdown - click only)
     $(document).ready(function () {
         function toggleNavbarMethod() {
             if ($(window).width() > 992) {
-                $('.navbar .dropdown').on('mouseover', function () {
+                // Only apply hover to navbar dropdowns, NOT user profile dropdown
+                $('.navbar .dropdown:not(.user-profile-dropdown)').on('mouseover', function () {
                     $('.dropdown-toggle', this).trigger('click');
                 }).on('mouseout', function () {
                     $('.dropdown-toggle', this).trigger('click').blur();
@@ -16,6 +17,36 @@
         }
         toggleNavbarMethod();
         $(window).resize(toggleNavbarMethod);
+        
+        // User profile dropdown - click only (no hover, disable Bootstrap auto-toggle)
+        $('.user-profile-dropdown .dropdown-toggle').off('click.bs.dropdown'); // Remove Bootstrap's default handler
+        
+        $('.user-profile-dropdown .dropdown-toggle').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var $dropdown = $(this).closest('.user-profile-dropdown');
+            var $menu = $dropdown.find('.dropdown-menu');
+            var isOpen = $dropdown.hasClass('show');
+            
+            // Close all user profile dropdowns first
+            $('.user-profile-dropdown').removeClass('show');
+            $('.user-profile-dropdown .dropdown-menu').removeClass('show');
+            
+            // Toggle current dropdown if it wasn't open
+            if (!isOpen) {
+                $dropdown.addClass('show');
+                $menu.addClass('show');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.user-profile-dropdown').length) {
+                $('.user-profile-dropdown').removeClass('show');
+                $('.user-profile-dropdown .dropdown-menu').removeClass('show');
+            }
+        });
     });
     
     

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -8,14 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\E-Commerce-Platform-Ass1.Service\E-Commerce-Platform-Ass1.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\E-Commerce-Platform-Ass1.Service\E-Commerce-Platform-Ass1.Service.csproj" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

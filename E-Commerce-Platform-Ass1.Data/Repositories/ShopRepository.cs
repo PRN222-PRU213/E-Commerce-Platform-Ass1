@@ -35,8 +35,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<bool> ExistsByShopName(string shopName)
         {
-            var shop = await _context.Shops
-                .FirstOrDefaultAsync(s => s.ShopName == shopName);
+            var shop = await _context.Shops.FirstOrDefaultAsync(s => s.ShopName == shopName);
 
             if (shop == null)
             {
@@ -47,8 +46,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<bool> ExistsByUserId(Guid userId)
         {
-            var shop = await _context.Shops
-                .FirstOrDefaultAsync(s => s.UserId == userId);
+            var shop = await _context.Shops.FirstOrDefaultAsync(s => s.UserId == userId);
             if (shop == null)
             {
                 return false;
@@ -66,11 +64,15 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
             return await _context.Shops.FindAsync(id);
         }
 
-        public async Task<IEnumerable<Shop>> GetByStatus(string status)
+        public async Task<Shop?> GetByUserIdAsync(Guid userId)
         {
             return await _context.Shops
-                .Where(s => s.Status == status)
-                .ToListAsync();
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+        }
+
+        public async Task<IEnumerable<Shop>> GetByStatus(string status)
+        {
+            return await _context.Shops.Where(s => s.Status == status).ToListAsync();
         }
 
         public async Task<Shop> UpdateAsync(Shop shop)

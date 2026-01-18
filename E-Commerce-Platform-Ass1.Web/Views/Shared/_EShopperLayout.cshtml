@@ -1,27 +1,11 @@
+@* Public shopping pages layout *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>@ViewData["Title"] - EShopper</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="E-Commerce Platform" name="keywords">
-    <meta content="E-Commerce Platform" name="description">
-
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Libraries Stylesheet -->
+    @await Html.PartialAsync("Partials/_Head")
+    
+    <!-- Libraries Stylesheet - Owl Carousel (only for public pages) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
 </head>
 <body>
     <!-- Topbar Start -->
@@ -142,12 +126,43 @@
                         <div class="navbar-nav ml-auto py-0">
                             @if (User?.Identity?.IsAuthenticated ?? false)
                             {
-                                <a href="" class="nav-item nav-link">
-                                    <i class="fas fa-user mr-1"></i>@User.Identity!.Name
-                                </a>
+                                <div class="nav-item dropdown user-profile-dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle user-profile-link" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-user-circle mr-2"></i>
+                                        <span class="user-name">@User.Identity!.Name</span>
+                                        <i class="fas fa-chevron-down ml-2 dropdown-arrow"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right user-dropdown-menu" aria-labelledby="userDropdown">
+                                        <div class="dropdown-header user-dropdown-header">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-avatar-circle">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div class="ml-2">
+                                                    <div class="font-weight-semi-bold">@User.Identity!.Name</div>
+                                                    <small class="text-muted">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item user-dropdown-item" asp-controller="Authentication" asp-action="Profile">
+                                            <i class="fas fa-user mr-2 text-primary"></i>Hồ sơ của tôi
+                                        </a>
+                                        @await Component.InvokeAsync("UserShopMenu")
+                                        <a class="dropdown-item user-dropdown-item" href="#">
+                                            <i class="fas fa-shopping-bag mr-2 text-primary"></i>Đơn hàng
+                                        </a>
+                                        <a class="dropdown-item user-dropdown-item" href="#">
+                                            <i class="fas fa-cog mr-2 text-primary"></i>Cài đặt
+                                        </a>
+                                        <div class="dropdown-divider"></div>
                                 <form asp-controller="Authentication" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-dark p-0">Đăng xuất</button>
+                                            <button type="submit" class="dropdown-item user-dropdown-item logout-btn">
+                                                <i class="fas fa-sign-out-alt mr-2 text-danger"></i>Đăng xuất
+                                            </button>
                                 </form>
+                                    </div>
+                                </div>
                             }
                             else
                             {
@@ -234,14 +249,7 @@
     <!-- Back to Top -->
     <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="~/js/main.js" asp-append-version="true"></script>
+    @await Html.PartialAsync("Partials/_Scripts")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

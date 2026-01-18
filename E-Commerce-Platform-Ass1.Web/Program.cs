@@ -1,8 +1,6 @@
 using E_Commerce_Platform_Ass1.Data.Database;
-using E_Commerce_Platform_Ass1.Data.Repositories;
-using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
-using E_Commerce_Platform_Ass1.Service.Services;
-using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using E_Commerce_Platform_Ass1.Service.Common.Configurations;
+using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Authentication
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Authentication/Login";
@@ -20,17 +19,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
-// DI for repositories & services
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
+// Configure Cloudinary
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
+builder.Services.AddService();
 
 var app = builder.Build();
 
@@ -50,10 +45,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

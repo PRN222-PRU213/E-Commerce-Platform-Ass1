@@ -1,0 +1,14 @@
+@model bool
+
+@if (Model)
+{
+    <a class="dropdown-item user-dropdown-item" asp-controller="Shop" asp-action="ViewShop">
+        <i class="fas fa-store mr-2 text-primary"></i>Xem thông tin shop
+    </a>
+}
+else
+{
+    <a class="dropdown-item user-dropdown-item" asp-controller="Shop" asp-action="RegisterShop">
+        <i class="fas fa-store mr-2 text-primary"></i>Đăng ký shop
+    </a>
+}

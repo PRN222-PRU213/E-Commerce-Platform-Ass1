@@ -364,3 +364,8 @@ FodyWeavers.xsd
 
 # Entity Framework Migrations
 **/Migrations/
+
+# Application settings (contains sensitive data like connection strings)
+**/appsettings.json
+**/appsettings.*.json
+!**/appsettings.example.json

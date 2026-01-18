@@ -30,7 +30,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            
+
             // Server-side validation
             if (!ModelState.IsValid)
             {
@@ -52,22 +52,29 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
-                new AuthenticationProperties
-                {
-                    IsPersistent = model.RememberMe
-                });
+                new AuthenticationProperties { IsPersistent = model.RememberMe }
+            );
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
+            }
+
+            // Redirect Admin to Admin Dashboard
+            if (user.Role == "Admin")
+            {
+                return RedirectToAction("Index", "Admin");
             }
 
             return RedirectToAction("Index", "Home");
@@ -105,6 +112,29 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            return View(user);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -114,4 +144,3 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
     }
 }
-
