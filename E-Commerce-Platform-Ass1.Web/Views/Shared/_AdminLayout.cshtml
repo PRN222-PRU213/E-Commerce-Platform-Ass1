@@ -266,6 +266,17 @@
                 </li>
             </ul>
 
+            <div class="menu-header">Quản lý Danh mục</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Categories" || ViewContext.RouteData.Values["action"]?.ToString() == "CreateCategory" || ViewContext.RouteData.Values["action"]?.ToString() == "EditCategory" ? "active" : "")" 
+                       asp-controller="Admin" asp-action="Categories">
+                        <i class="fas fa-tags"></i>
+                        <span>Danh sách danh mục</span>
+                    </a>
+                </li>
+            </ul>
+
             <div class="menu-header">Khác</div>
             <ul class="nav flex-column">
                 <li class="nav-item">

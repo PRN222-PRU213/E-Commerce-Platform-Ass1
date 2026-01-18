@@ -417,5 +417,116 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         }
 
         #endregion
+
+        #region Category Management
+
+        public async Task<ServiceResult<List<CategoryDto>>> GetAllCategoriesAsync()
+        {
+            var categories = await _categoryRepository.GetAllAsync();
+            var categoryDtos = categories.Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Status = c.Status,
+                ProductCount = c.Products?.Count ?? 0
+            }).ToList();
+
+            return ServiceResult<List<CategoryDto>>.Success(categoryDtos);
+        }
+
+        public async Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(Guid categoryId)
+        {
+            var category = await _categoryRepository.GetByIdAsync(categoryId);
+            if (category == null)
+            {
+                return ServiceResult<CategoryDto>.Failure("Danh mục không tồn tại.");
+            }
+
+            var dto = new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Status = category.Status,
+                ProductCount = category.Products?.Count ?? 0
+            };
+
+            return ServiceResult<CategoryDto>.Success(dto);
+        }
+
+        public async Task<ServiceResult<Guid>> CreateCategoryAsync(CreateCategoryDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return ServiceResult<Guid>.Failure("Tên danh mục không được để trống.");
+            }
+
+            // Kiểm tra tên đã tồn tại chưa
+            var exists = await _categoryRepository.ExistsByName(dto.Name);
+            if (exists)
+            {
+                return ServiceResult<Guid>.Failure("Tên danh mục đã tồn tại.");
+            }
+
+            var category = new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name.Trim(),
+                Status = dto.Status ?? "Active"
+            };
+
+            await _categoryRepository.AddAsync(category);
+
+            return ServiceResult<Guid>.Success(category.Id);
+        }
+
+        public async Task<ServiceResult> UpdateCategoryAsync(Guid categoryId, UpdateCategoryDto dto)
+        {
+            var category = await _categoryRepository.GetByIdAsync(categoryId);
+            if (category == null)
+            {
+                return ServiceResult.Failure("Danh mục không tồn tại.");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return ServiceResult.Failure("Tên danh mục không được để trống.");
+            }
+
+            // Kiểm tra tên đã tồn tại ở category khác chưa
+            var existingCategory = await _categoryRepository.GetAllAsync();
+            if (existingCategory.Any(c => c.Name == dto.Name.Trim() && c.Id != categoryId))
+            {
+                return ServiceResult.Failure("Tên danh mục đã tồn tại.");
+            }
+
+            category.Name = dto.Name.Trim();
+            category.Status = dto.Status;
+
+            await _categoryRepository.UpdateAsync(category);
+
+            return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> DeleteCategoryAsync(Guid categoryId)
+        {
+            var category = await _categoryRepository.GetByIdAsync(categoryId);
+            if (category == null)
+            {
+                return ServiceResult.Failure("Danh mục không tồn tại.");
+            }
+
+            // Kiểm tra có sản phẩm nào đang sử dụng category này không
+            var products = await _productRepository.GetByCategoryIdAsync(categoryId);
+            if (products.Any())
+            {
+                return ServiceResult.Failure($"Không thể xóa danh mục đang có {products.Count()} sản phẩm.");
+            }
+
+            await _categoryRepository.DeleteAsync(category);
+
+            return ServiceResult.Success();
+        }
+
+        #endregion
     }
 }

@@ -198,5 +198,125 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         #endregion
+
+        #region Category Management
+
+        /// <summary>
+        /// Danh sách tất cả Category
+        /// </summary>
+        public async Task<IActionResult> Categories()
+        {
+            var result = await _adminService.GetAllCategoriesAsync();
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.ErrorMessage;
+                return View(new List<E_Commerce_Platform_Ass1.Service.DTOs.CategoryDto>());
+            }
+
+            return View(result.Data);
+        }
+
+        /// <summary>
+        /// Form tạo Category mới
+        /// </summary>
+        [HttpGet]
+        public IActionResult CreateCategory()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Xử lý tạo Category mới
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCategory(E_Commerce_Platform_Ass1.Service.DTOs.CreateCategoryDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            var result = await _adminService.CreateCategoryAsync(dto);
+            if (result.IsSuccess)
+            {
+                TempData["Success"] = "Đã tạo danh mục thành công!";
+                return RedirectToAction(nameof(Categories));
+            }
+            
+            TempData["Error"] = result.ErrorMessage;
+            return View(dto);
+        }
+
+        /// <summary>
+        /// Form sửa Category
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> EditCategory(Guid id)
+        {
+            var result = await _adminService.GetCategoryByIdAsync(id);
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.ErrorMessage;
+                return RedirectToAction(nameof(Categories));
+            }
+
+            var dto = new E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto
+            {
+                Name = result.Data!.Name,
+                Status = result.Data.Status
+            };
+
+            ViewBag.CategoryId = id;
+            ViewBag.ProductCount = result.Data.ProductCount;
+            return View(dto);
+        }
+
+        /// <summary>
+        /// Xử lý sửa Category
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(Guid id, E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.CategoryId = id;
+                return View(dto);
+            }
+
+            var result = await _adminService.UpdateCategoryAsync(id, dto);
+            if (result.IsSuccess)
+            {
+                TempData["Success"] = "Đã cập nhật danh mục thành công!";
+                return RedirectToAction(nameof(Categories));
+            }
+            
+            TempData["Error"] = result.ErrorMessage;
+            ViewBag.CategoryId = id;
+            return View(dto);
+        }
+
+        /// <summary>
+        /// Xóa Category
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategory(Guid id)
+        {
+            var result = await _adminService.DeleteCategoryAsync(id);
+            if (result.IsSuccess)
+            {
+                TempData["Success"] = "Đã xóa danh mục thành công!";
+            }
+            else
+            {
+                TempData["Error"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction(nameof(Categories));
+        }
+
+        #endregion
     }
 }

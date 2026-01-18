@@ -34,13 +34,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<bool> ExistsByName(string name)
         {
-            var category = await _context.Categories.FindAsync(name);
-            if (category == null)
-            {
-                return false;
-            }
-
-            return true;
+            return await _context.Categories.AnyAsync(c => c.Name == name);
         }
 
         public async Task<IEnumerable<Category>> GetAllAsync()

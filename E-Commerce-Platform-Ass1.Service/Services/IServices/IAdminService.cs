@@ -71,6 +71,35 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 
         #endregion
 
+        #region Category Management
+
+        /// <summary>
+        /// Lấy tất cả categories
+        /// </summary>
+        Task<ServiceResult<List<CategoryDto>>> GetAllCategoriesAsync();
+
+        /// <summary>
+        /// Lấy category theo Id
+        /// </summary>
+        Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(Guid categoryId);
+
+        /// <summary>
+        /// Tạo category mới
+        /// </summary>
+        Task<ServiceResult<Guid>> CreateCategoryAsync(CreateCategoryDto dto);
+
+        /// <summary>
+        /// Cập nhật category
+        /// </summary>
+        Task<ServiceResult> UpdateCategoryAsync(Guid categoryId, UpdateCategoryDto dto);
+
+        /// <summary>
+        /// Xóa category
+        /// </summary>
+        Task<ServiceResult> DeleteCategoryAsync(Guid categoryId);
+
+        #endregion
+
         #region Statistics
 
         /// <summary>
