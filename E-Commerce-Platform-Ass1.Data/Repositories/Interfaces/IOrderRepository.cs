@@ -11,7 +11,9 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories.Interfaces
     {
         Task<Order?> GetByIdAsync(Guid orderId);
         Task<Order?> GetByIdWithItemsAsync(Guid orderId);
+        Task<Order?> GetByIdWithDetailsAsync(Guid orderId);
         Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId);
+        Task<IEnumerable<Order>> GetByShopIdAsync(Guid shopId);
         Task<Order> AddAsync(Order order);
         Task<Order> UpdateAsync(Order order);
     }
