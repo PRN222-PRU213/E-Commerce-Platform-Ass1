@@ -5,11 +5,11 @@
     Layout = "~/Views/Shared/_ShopDashboardLayout.cshtml";
     var products = ViewBag.Products as List<ProductDto> ?? new List<ProductDto>();
     
-    // Calculate statistics
+    // Calculate statistics (sử dụng lowercase để match với database)
     var totalProducts = products.Count;
-    var activeProducts = products.Count(p => p.Status == "Active");
-    var pendingProducts = products.Count(p => p.Status == "Pending");
-    var draftProducts = products.Count(p => p.Status == "Daft");
+    var activeProducts = products.Count(p => p.Status == "active");
+    var pendingProducts = products.Count(p => p.Status == "pending");
+    var draftProducts = products.Count(p => p.Status == "draft");
 }
 
 <!-- Page Header Start -->
@@ -202,13 +202,13 @@
                             <button type="button" class="btn btn-sm btn-outline-primary filter-btn active" data-filter="all">
                                 Tất cả (@totalProducts)
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-success filter-btn" data-filter="Active">
+                            <button type="button" class="btn btn-sm btn-outline-success filter-btn" data-filter="active">
                                 Active (@activeProducts)
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-warning filter-btn" data-filter="Pending">
+                            <button type="button" class="btn btn-sm btn-outline-warning filter-btn" data-filter="pending">
                                 Pending (@pendingProducts)
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary filter-btn" data-filter="Draft">
+                            <button type="button" class="btn btn-sm btn-outline-secondary filter-btn" data-filter="draft">
                                 Draft (@draftProducts)
                             </button>
                         </div>
@@ -227,9 +227,9 @@
                                             
                                             <!-- Status Badge Top Right -->
                                             <div class="position-absolute" style="top: 10px; right: 10px;">
-                                                @if (product.Status == "Active") { <span class="badge badge-success shadow-sm">Active</span> }
-                                                else if (product.Status == "Pending") { <span class="badge badge-warning shadow-sm text-white">Pending</span> }
-                                                else if (product.Status == "Draft") { <span class="badge badge-secondary shadow-sm">Draft</span> }
+                                                @if (product.Status == "active") { <span class="badge badge-success shadow-sm">Active</span> }
+                                                else if (product.Status == "pending") { <span class="badge badge-warning shadow-sm text-white">Pending</span> }
+                                                else if (product.Status == "draft") { <span class="badge badge-secondary shadow-sm">Draft</span> }
                                                 else { <span class="badge badge-danger shadow-sm">@product.Status</span> }
                                             </div>
                                         </div>
