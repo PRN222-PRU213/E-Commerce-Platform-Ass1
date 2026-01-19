@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using E_Commerce_Platform_Ass1.Data.Database;
+﻿using E_Commerce_Platform_Ass1.Data.Database;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +39,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
         public async Task<CartItem?> GetByCartAndVariantAsync(Guid cartId, Guid productVariantId)
         {
             return await _context.CartItems
-                .FirstOrDefaultAsync(c => c.CartId == cartId 
+                .FirstOrDefaultAsync(c => c.CartId == cartId
                                        && c.ProductVariantId == productVariantId);
         }
 
@@ -57,7 +52,9 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<CartItem?> GetByIdAsync(Guid id)
         {
-            return await _context.CartItems.FindAsync(id);
+            return await _context.CartItems
+                .Include(c => c.Cart)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task UpdateAsync(CartItem cartItem)

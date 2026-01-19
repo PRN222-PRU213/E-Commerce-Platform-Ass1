@@ -15,6 +15,7 @@ namespace E_Commerce_Platform_Ass1.Web.Models
 
     public class CartItemViewModel
     {
+        public Guid CartItemId { get; set; }
         public Guid ProductId { get; set; }
         public string ProductName { get; set; }
         public string ImageUrl { get; set; }
