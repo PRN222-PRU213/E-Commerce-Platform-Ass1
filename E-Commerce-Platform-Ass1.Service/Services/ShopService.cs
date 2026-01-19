@@ -44,7 +44,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ShopName = shopName.Trim(),
                 Description = description.Trim(),
                 Status = "Pending", // Chờ phê duyệt
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
 
             return await _shopRepository.AddAsync(shop);

@@ -230,7 +230,9 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateCategory(E_Commerce_Platform_Ass1.Service.DTOs.CreateCategoryDto dto)
+        public async Task<IActionResult> CreateCategory(
+            E_Commerce_Platform_Ass1.Service.DTOs.CreateCategoryDto dto
+        )
         {
             if (!ModelState.IsValid)
             {
@@ -243,7 +245,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 TempData["Success"] = "Đã tạo danh mục thành công!";
                 return RedirectToAction(nameof(Categories));
             }
-            
+
             TempData["Error"] = result.ErrorMessage;
             return View(dto);
         }
@@ -264,7 +266,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var dto = new E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto
             {
                 Name = result.Data!.Name,
-                Status = result.Data.Status
+                Status = result.Data.Status,
             };
 
             ViewBag.CategoryId = id;
@@ -277,7 +279,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCategory(Guid id, E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto dto)
+        public async Task<IActionResult> EditCategory(
+            Guid id,
+            E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto dto
+        )
         {
             if (!ModelState.IsValid)
             {
@@ -291,7 +296,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 TempData["Success"] = "Đã cập nhật danh mục thành công!";
                 return RedirectToAction(nameof(Categories));
             }
-            
+
             TempData["Error"] = result.ErrorMessage;
             ViewBag.CategoryId = id;
             return View(dto);

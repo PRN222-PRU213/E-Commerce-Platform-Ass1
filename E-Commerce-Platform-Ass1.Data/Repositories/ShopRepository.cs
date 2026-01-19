@@ -66,8 +66,7 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<Shop?> GetByUserIdAsync(Guid userId)
         {
-            return await _context.Shops
-                .FirstOrDefaultAsync(s => s.UserId == userId);
+            return await _context.Shops.FirstOrDefaultAsync(s => s.UserId == userId);
         }
 
         public async Task<IEnumerable<Shop>> GetByStatus(string status)
