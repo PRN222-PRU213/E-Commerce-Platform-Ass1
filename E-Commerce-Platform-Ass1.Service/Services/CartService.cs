@@ -38,6 +38,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
         }
 
+        public async Task<decimal> GetCartTotalAsync(Guid userId)
+        {
+            return await _cartRepository.GetCartTotalAsync(userId);
+        }
+
         public async Task<CartViewModel?> GetCartUserAsync(Guid userId)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
@@ -71,6 +76,23 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public async Task<int> GetTotalItemCountAsync(Guid userId)
         {
             return await _cartRepository.GetTotalItemCountAsync(userId);
+        }
+
+        public async Task<bool> RemoveItemAsync(Guid userId, Guid cartItemId)
+        {
+            var item = await _cartItemRepository.GetByIdAsync(cartItemId);
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (item.Cart.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền xóa món hàng này.");
+            }
+
+            await _cartItemRepository.DeleteAsync(item);
+            return true;
         }
     }
 }

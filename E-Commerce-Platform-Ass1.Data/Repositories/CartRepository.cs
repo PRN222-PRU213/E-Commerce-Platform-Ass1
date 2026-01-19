@@ -50,6 +50,14 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.Status == "ACTIVE");
         }
 
+        public async Task<decimal> GetCartTotalAsync(Guid userId)
+        {
+            return await _context.Carts
+                .Where(c => c.UserId == userId && c.Status == "ACTIVE")
+                .SelectMany(c => c.CartItems)
+                .SumAsync(ci => ci.Quantity * ci.ProductVariant.Price);
+        }
+
         public async Task<int> GetTotalItemCountAsync(Guid userId)
         {
             var cart = await _context.Carts

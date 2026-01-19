@@ -1,0 +1,143 @@
+﻿@{
+	ViewData["Title"] = "Kết quả thanh toán";
+	var isSuccess = ViewBag.IsSuccess != null && (bool)ViewBag.IsSuccess;
+	var message = ViewBag.Message as string ?? "Không có thông tin";
+}
+
+<style>
+	.payment-wrapper {
+		min-height: 70vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.payment-card {
+		width: 100%;
+		max-width: 480px;
+		background: #fff;
+		border-radius: 16px;
+		padding: 40px 30px;
+		text-align: center;
+		box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+	}
+
+	.payment-card.success {
+		border-top: 6px solid #28a745;
+	}
+
+	.payment-card.fail {
+		border-top: 6px solid #dc3545;
+	}
+
+	.icon-wrapper {
+		margin-bottom: 20px;
+	}
+
+	.icon {
+		width: 80px;
+		height: 80px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		font-size: 36px;
+		color: #fff;
+	}
+
+	.success-icon {
+		background: #28a745;
+	}
+
+	.fail-icon {
+		background: #dc3545;
+	}
+
+	.title {
+		font-weight: 700;
+		margin-bottom: 10px;
+	}
+
+	.message {
+		color: #555;
+		margin-bottom: 25px;
+	}
+
+	.action {
+		margin-bottom: 10px;
+	}
+
+	.auto-back {
+		font-size: 13px;
+		color: #999;
+		margin-top: 15px;
+	}
+</style>
+
+<div class="payment-wrapper">
+	<div class="payment-card @(isSuccess ? "success" : "fail")">
+
+		<div class="icon-wrapper">
+			@if (isSuccess)
+			{
+						<span class="icon success-icon">✔</span>
+			}
+			else
+			{
+						<span class="icon fail-icon">✖</span>
+			}
+		</div>
+
+		<h2 class="title">
+			@(isSuccess ? "Thanh toán thành công" : "Thanh toán không thành công")
+		</h2>
+
+		<p class="message">@message</p>
+
+		<div class="action">
+			@if (isSuccess)
+			{
+						<a asp-controller="Home"
+						   asp-action="Index"
+						   class="btn btn-success btn-lg">
+							Về trang chủ
+						</a>
+			}
+			else
+			{
+						<a asp-controller="Cart"
+						   asp-action="Index"
+						   class="btn btn-warning btn-lg">
+							Quay về giỏ hàng
+						</a>
+			}
+		</div>
+
+		@if (!isSuccess)
+		{
+			<p class="text-muted">
+				Tự động quay về giỏ hàng sau 
+				<strong id="countdown">10</strong> giây...
+			</p>
+		}
+	</div>
+</div>
+
+@if (!isSuccess)
+{
+				<script>
+		let seconds = 10;
+		const countdownEl = document.getElementById("countdown");
+
+		const timer = setInterval(() => {
+			seconds--;
+			countdownEl.textContent = seconds;
+
+			if (seconds <= 0) {
+				clearInterval(timer);
+				window.location.href = "/Cart"; // 🔁 đổi nếu route khác
+			}
+		}, 1000);
+	</script>
+
+}

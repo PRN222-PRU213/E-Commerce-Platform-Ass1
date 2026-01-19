@@ -18,7 +18,8 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public ShopOrderService(
             IOrderRepository orderRepository,
             IShipmentRepository shipmentRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository
+        )
         {
             _orderRepository = orderRepository;
             _shipmentRepository = shipmentRepository;
@@ -28,27 +29,32 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         public async Task<ServiceResult<List<OrderDto>>> GetOrdersByShopIdAsync(Guid shopId)
         {
             var orders = await _orderRepository.GetByShopIdAsync(shopId);
-            
-            var orderDtos = orders.Select(o => new OrderDto
-            {
-                Id = o.Id,
-                UserId = o.UserId,
-                CustomerName = o.User?.Name,
-                CustomerEmail = o.User?.Email,
-                TotalAmount = o.TotalAmount,
-                ShippingAddress = o.ShippingAddress,
-                Status = o.Status,
-                CreatedAt = o.CreatedAt,
-                ItemCount = o.OrderItems.Count,
-                Carrier = o.Shipments?.FirstOrDefault()?.Carrier,
-                TrackingCode = o.Shipments?.FirstOrDefault()?.TrackingCode,
-                ShipmentStatus = o.Shipments?.FirstOrDefault()?.Status
-            }).ToList();
+
+            var orderDtos = orders
+                .Select(o => new OrderDto
+                {
+                    Id = o.Id,
+                    UserId = o.UserId,
+                    CustomerName = o.User?.Name,
+                    CustomerEmail = o.User?.Email,
+                    TotalAmount = o.TotalAmount,
+                    ShippingAddress = o.ShippingAddress,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    ItemCount = o.OrderItems.Count,
+                    Carrier = o.Shipments?.FirstOrDefault()?.Carrier,
+                    TrackingCode = o.Shipments?.FirstOrDefault()?.TrackingCode,
+                    ShipmentStatus = o.Shipments?.FirstOrDefault()?.Status,
+                })
+                .ToList();
 
             return ServiceResult<List<OrderDto>>.Success(orderDtos);
         }
 
-        public async Task<ServiceResult<OrderDetailDto>> GetOrderDetailAsync(Guid orderId, Guid shopId)
+        public async Task<ServiceResult<OrderDetailDto>> GetOrderDetailAsync(
+            Guid orderId,
+            Guid shopId
+        )
         {
             var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
             if (order == null)
@@ -57,7 +63,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra đơn hàng có thuộc shop này không
-            var hasShopItem = order.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shopId);
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
             if (!hasShopItem)
             {
                 return ServiceResult<OrderDetailDto>.Failure("Đơn hàng không thuộc shop của bạn.");
@@ -80,35 +88,43 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Carrier = shipment?.Carrier,
                 TrackingCode = shipment?.TrackingCode,
                 ShipmentStatus = shipment?.Status,
-                Items = order.OrderItems.Select(oi => new OrderItemDto
-                {
-                    Id = oi.Id,
-                    ProductVariantId = oi.ProductVariantId,
-                    ProductName = oi.ProductName,
-                    VariantName = oi.ProductVariant?.VariantName,
-                    Size = oi.ProductVariant?.Size,
-                    Color = oi.ProductVariant?.Color,
-                    ImageUrl = oi.ProductVariant?.Product?.ImageUrl,
-                    Price = oi.Price,
-                    Quantity = oi.Quantity
-                }).ToList(),
-                Payment = payment != null ? new PaymentDto
-                {
-                    Id = payment.Id,
-                    Method = payment.Method,
-                    Amount = payment.Amount,
-                    Status = payment.Status,
-                    TransactionCode = payment.TransactionCode,
-                    PaidAt = payment.PaidAt
-                } : null,
-                Shipment = shipment != null ? new ShipmentDto
-                {
-                    Id = shipment.Id,
-                    Carrier = shipment.Carrier,
-                    TrackingCode = shipment.TrackingCode,
-                    Status = shipment.Status,
-                    UpdatedAt = shipment.UpdatedAt
-                } : null
+                Items = order
+                    .OrderItems.Select(oi => new OrderItemDto
+                    {
+                        Id = oi.Id,
+                        ProductVariantId = oi.ProductVariantId,
+                        ProductName = oi.ProductName,
+                        VariantName = oi.ProductVariant?.VariantName,
+                        Size = oi.ProductVariant?.Size,
+                        Color = oi.ProductVariant?.Color,
+                        ImageUrl = oi.ProductVariant?.Product?.ImageUrl,
+                        Price = oi.Price,
+                        Quantity = oi.Quantity,
+                    })
+                    .ToList(),
+                Payment =
+                    payment != null
+                        ? new PaymentDto
+                        {
+                            Id = payment.Id,
+                            Method = payment.Method,
+                            Amount = payment.Amount,
+                            Status = payment.Status,
+                            TransactionCode = payment.TransactionCode,
+                            PaidAt = payment.PaidAt,
+                        }
+                        : null,
+                Shipment =
+                    shipment != null
+                        ? new ShipmentDto
+                        {
+                            Id = shipment.Id,
+                            Carrier = shipment.Carrier,
+                            TrackingCode = shipment.TrackingCode,
+                            Status = shipment.Status,
+                            UpdatedAt = shipment.UpdatedAt,
+                        }
+                        : null,
             };
 
             return ServiceResult<OrderDetailDto>.Success(dto);
@@ -123,7 +139,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra quyền
-            var hasShopItem = order.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shopId);
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
             if (!hasShopItem)
             {
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
@@ -140,7 +158,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return ServiceResult.Success();
         }
 
-        public async Task<ServiceResult> UpdateShipmentAsync(Guid orderId, Guid shopId, UpdateShipmentDto dto)
+        public async Task<ServiceResult> UpdateShipmentAsync(
+            Guid orderId,
+            Guid shopId,
+            UpdateShipmentDto dto
+        )
         {
             var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
             if (order == null)
@@ -149,7 +171,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra quyền
-            var hasShopItem = order.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shopId);
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
             if (!hasShopItem)
             {
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
@@ -175,7 +199,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                     Carrier = dto.Carrier,
                     TrackingCode = dto.TrackingCode,
                     Status = dto.Status,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
                 };
                 await _shipmentRepository.AddAsync(shipment);
             }
@@ -200,7 +224,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra quyền
-            var hasShopItem = order.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shopId);
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
             if (!hasShopItem)
             {
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
@@ -231,7 +257,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra quyền
-            var hasShopItem = order.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shopId);
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
             if (!hasShopItem)
             {
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
@@ -261,7 +289,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ShippingOrders = orderList.Count(o => o.Status == "Processing"),
                 DeliveredOrders = orderList.Count(o => o.Status == "Completed"),
                 CancelledOrders = orderList.Count(o => o.Status == "Cancelled"),
-                TotalRevenue = orderList.Where(o => o.Status == "Completed").Sum(o => o.TotalAmount)
+                TotalRevenue = orderList
+                    .Where(o => o.Status == "Completed")
+                    .Sum(o => o.TotalAmount),
             };
         }
     }

@@ -8,6 +8,10 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 
         Task<CartViewModel?> GetCartUserAsync(Guid userId);
 
+        Task<decimal> GetCartTotalAsync(Guid userId);
+
         Task<int> GetTotalItemCountAsync(Guid userId);
+
+        Task<bool> RemoveItemAsync(Guid userId, Guid cartItemId);
     }
 }
