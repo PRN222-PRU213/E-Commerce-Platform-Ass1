@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Kết quả thanh toán";
+
+    // MoMo return params
+    var resultCode = Context.Request.Query["resultCode"].ToString();
+    var message = Context.Request.Query["message"].ToString();
+    var orderId = Context.Request.Query["orderId"].ToString();
+    var amount = Context.Request.Query["amount"].ToString();
+
+    bool isSuccess = resultCode == "0";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+
+            @if (isSuccess)
+            {
+                    <div class="alert alert-success">
+                        <h3 class="mb-3">🎉 Thanh toán thành công</h3>
+                        <p><strong>Mã đơn hàng:</strong> @orderId</p>
+                        <p><strong>Số tiền:</strong> @amount VND</p>
+                        <p><strong>Thông báo:</strong> @message</p>
+                    </div>
+            }
+            else
+            {
+                    <div class="alert alert-danger">
+                        <h3 class="mb-3">❌ Thanh toán thất bại</h3>
+                        <p><strong>Mã đơn hàng:</strong> @orderId</p>
+                        <p><strong>Lý do:</strong> @message</p>
+                    </div>
+            }
+
+            <div class="mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    Về trang chủ
+                </a>
+
+                @if (!isSuccess)
+                {
+                        <a asp-controller="Payment" asp-action="Retry" class="btn btn-warning ms-2">
+                            Thanh toán lại
+                        </a>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
