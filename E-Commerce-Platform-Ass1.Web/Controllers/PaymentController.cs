@@ -17,8 +17,17 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PayWithMomo()
+        public async Task<IActionResult> PayWithMomo(string shippingAddress)
         {
+            if (string.IsNullOrWhiteSpace(shippingAddress))
+            {
+                TempData["Error"] = "Vui lòng nhập địa chỉ giao hàng";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            // ✅ Lưu vào Session
+            HttpContext.Session.SetString("ShippingAddress", shippingAddress);
+
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var cart = await _cartService.GetCartUserAsync(userId);

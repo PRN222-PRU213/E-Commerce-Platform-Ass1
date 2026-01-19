@@ -200,9 +200,23 @@
                             <h5 class="font-weight-bold text-primary">@Model.TotalPrice.ToString("N0") VNĐ</h5>
                         </div>
 
-                        <button class="btn btn-primary btn-block py-3 checkout-btn shadow">
-                            TIẾN HÀNH THANH TOÁN
-                        </button>
+                        <form method="post" action="/Payment/PayWithMomo" id="checkoutForm">
+                            <div class="form-group mb-3">
+                                <label class="font-weight-bold">Địa chỉ giao hàng</label>
+                                <textarea id="shippingAddress"
+                                          name="shippingAddress"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Nhập địa chỉ giao hàng..."
+                                          required></textarea>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-block py-3 checkout-btn shadow">
+                                TIẾN HÀNH THANH TOÁN
+                            </button>
+                        </form>
+
 
                         <div class="text-center mt-4">
                             <p class="small text-muted mb-2">Chúng tôi chấp nhận</p>
@@ -271,4 +285,15 @@
                 });
             });
         </script>
+
+    <script>
+        $('#checkoutForm').on('submit', function (e) {
+            var address = $('#shippingAddress').val().trim();
+
+            if (!address) {
+                e.preventDefault();
+                alert('Vui lòng nhập địa chỉ giao hàng');
+            }
+        });
+    </script>
 }
