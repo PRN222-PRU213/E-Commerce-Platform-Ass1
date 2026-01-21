@@ -165,6 +165,44 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         /// <summary>
+        /// GET /Products/Detail/{id} - Xem chi tiết sản phẩm (readonly)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _productService.GetProductDetailAsync(id, shop.Id);
+            if (!result.IsSuccess || result.Data == null)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Không tìm thấy sản phẩm.";
+                return RedirectToAction("Index");
+            }
+
+            var product = result.Data;
+            var viewModel = new ProductDetailViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                BasePrice = product.BasePrice,
+                ImageUrl = product.ImageUrl,
+                Status = product.Status,
+                CategoryName = product.CategoryName,
+                AvgRating = product.AvgRating,
+                CreatedAt = product.CreatedAt,
+                Variants = product.Variants ?? new List<ProductVariantDto>(),
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
         /// GET /Products/Edit/{id} - Trang chỉnh sửa sản phẩm và quản lý variants
         /// </summary>
         [HttpGet]

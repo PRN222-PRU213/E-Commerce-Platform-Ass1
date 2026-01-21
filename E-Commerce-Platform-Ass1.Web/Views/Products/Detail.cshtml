@@ -1,0 +1,299 @@
+@model E_Commerce_Platform_Ass1.Web.Models.ProductDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm - " + Model.Name;
+    Layout = "~/Views/Shared/_ShopDashboardLayout.cshtml";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid bg-secondary mb-4">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 150px">
+        <h1 class="font-weight-semi-bold text-uppercase mb-3">
+            <i class="fas fa-box text-primary mr-2"></i>Chi tiết sản phẩm
+        </h1>
+        <div class="d-inline-flex">
+            <p class="m-0"><a asp-controller="Shop" asp-action="ViewShop" class="text-dark">Dashboard</a></p>
+            <p class="m-0 px-2">-</p>
+            <p class="m-0"><a asp-controller="Products" asp-action="Index" class="text-dark">Sản phẩm</a></p>
+            <p class="m-0 px-2">-</p>
+            <p class="m-0">Chi tiết</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<div class="container-fluid py-4">
+    <div class="row px-xl-5">
+        <!-- Product Image & Basic Info -->
+        <div class="col-lg-5 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="position-relative">
+                    <img class="card-img-top" 
+                         src="@(!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : Url.Content("~/img/product-1.jpg"))" 
+                         alt="@Model.Name"
+                         style="height: 400px; object-fit: cover;">
+                    
+                    <!-- Status Badge -->
+                    <div class="position-absolute" style="top: 15px; right: 15px;">
+                        <span class="badge @Model.StatusBadgeClass px-3 py-2" style="font-size: 14px;">
+                            @Model.StatusDisplayName
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="text-warning mr-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= (double)Model.AvgRating)
+                                {
+                                    <i class="fa fa-star"></i>
+                                }
+                                else if (i - 0.5 <= (double)Model.AvgRating)
+                                {
+                                    <i class="fa fa-star-half-alt"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            }
+                        </div>
+                        <span class="text-muted">(@Model.AvgRating.ToString("F1") / 5.0)</span>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="mb-3">
+                        @if (Model.MinPrice != Model.MaxPrice)
+                        {
+                            <h3 class="text-primary font-weight-bold mb-0">
+                                @Model.MinPrice.ToString("N0")₫ - @Model.MaxPrice.ToString("N0")₫
+                            </h3>
+                        }
+                        else
+                        {
+                            <h3 class="text-primary font-weight-bold mb-0">
+                                @Model.BasePrice.ToString("N0")₫
+                            </h3>
+                        }
+                        <small class="text-muted">Giá cơ bản: @Model.BasePrice.ToString("N0")₫</small>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="row text-center border-top pt-3">
+                        <div class="col-4">
+                            <h5 class="text-primary mb-0">@Model.Variants.Count</h5>
+                            <small class="text-muted">Biến thể</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-success mb-0">@Model.TotalStock</h5>
+                            <small class="text-muted">Tồn kho</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-info mb-0">@Model.CreatedAt.ToString("dd/MM")</h5>
+                            <small class="text-muted">Ngày tạo</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-edit mr-2"></i>Chỉnh sửa sản phẩm
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-block">
+                        <i class="fas fa-arrow-left mr-2"></i>Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-7">
+            <!-- Basic Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>Thông tin sản phẩm
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="font-weight-bold mb-3">@Model.Name</h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted mb-1">Mã sản phẩm</label>
+                            <p class="font-weight-bold mb-0">
+                                <code>@Model.Id.ToString().Substring(0, 8).ToUpper()</code>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted mb-1">Danh mục</label>
+                            <p class="mb-0">
+                                <span class="badge badge-light px-3 py-2">
+                                    <i class="fas fa-tag mr-1"></i>@(Model.CategoryName ?? "Chưa phân loại")
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted mb-1">Trạng thái</label>
+                            <p class="mb-0">
+                                <span class="badge @Model.StatusBadgeClass px-3 py-2">@Model.StatusDisplayName</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted mb-1">Ngày tạo</label>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar-alt text-primary mr-1"></i>
+                                @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <label class="text-muted mb-2">Mô tả sản phẩm</label>
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <div class="bg-light p-3 rounded">
+                                <p class="mb-0" style="white-space: pre-line;">@Model.Description</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0 font-italic">Chưa có mô tả</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variants Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-layer-group text-primary mr-2"></i>Biến thể sản phẩm
+                        <span class="badge badge-primary ml-2">@Model.Variants.Count</span>
+                    </h5>
+                    @if (Model.Status == "draft")
+                    {
+                        <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus mr-1"></i>Thêm biến thể
+                        </a>
+                    }
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Variants.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 60px;">Ảnh</th>
+                                        <th>Tên biến thể</th>
+                                        <th>Size</th>
+                                        <th>Màu</th>
+                                        <th class="text-right">Giá</th>
+                                        <th class="text-center">Tồn kho</th>
+                                        <th>SKU</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var variant in Model.Variants)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <img src="@(!string.IsNullOrEmpty(variant.ImageUrl) ? variant.ImageUrl : (!string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : Url.Content("~/img/product-1.jpg")))" 
+                                                     alt="@variant.VariantName"
+                                                     class="rounded"
+                                                     style="width: 45px; height: 45px; object-fit: cover;">
+                                            </td>
+                                            <td class="font-weight-bold">@variant.VariantName</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(variant.Size))
+                                                {
+                                                    <span class="badge badge-outline-secondary">@variant.Size</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(variant.Color))
+                                                {
+                                                    <span class="badge badge-outline-secondary">@variant.Color</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td class="text-right font-weight-bold text-primary">
+                                                @variant.Price.ToString("N0")₫
+                                            </td>
+                                            <td class="text-center">
+                                                @if (variant.Stock > 10)
+                                                {
+                                                    <span class="badge badge-success">@variant.Stock</span>
+                                                }
+                                                else if (variant.Stock > 0)
+                                                {
+                                                    <span class="badge badge-warning">@variant.Stock</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Hết hàng</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <code class="small">@(variant.Sku ?? "-")</code>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-cubes fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Chưa có biến thể nào</h6>
+                            <p class="text-muted small mb-3">Thêm biến thể để bắt đầu bán sản phẩm này.</p>
+                            @if (Model.Status == "draft")
+                            {
+                                <a asp-action="AddVariant" asp-route-id="@Model.Id" class="btn btn-primary">
+                                    <i class="fas fa-plus mr-2"></i>Thêm biến thể đầu tiên
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .badge-outline-secondary {
+            background: transparent;
+            border: 1px solid #6c757d;
+            color: #6c757d;
+        }
+        .card {
+            transition: none !important;
+        }
+        .card:hover {
+            transform: none !important;
+            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+        }
+    </style>
+}

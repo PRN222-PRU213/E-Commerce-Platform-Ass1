@@ -207,4 +207,47 @@ namespace E_Commerce_Platform_Ass1.Web.Models
         [Url(ErrorMessage = "URL không hợp lệ.")]
         public string? ImageUrl { get; set; }
     }
+
+    /// <summary>
+    /// ViewModel cho trang xem chi tiết sản phẩm (readonly)
+    /// </summary>
+    public class ProductDetailViewModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal BasePrice { get; set; }
+        public string? ImageUrl { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string? CategoryName { get; set; }
+        public decimal AvgRating { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public List<E_Commerce_Platform_Ass1.Service.DTOs.ProductVariantDto> Variants { get; set; } =
+            new();
+
+        // Helper properties
+        public string StatusBadgeClass =>
+            Status switch
+            {
+                "active" => "badge-success",
+                "inactive" => "badge-secondary",
+                "draft" => "badge-warning",
+                "pending" => "badge-info",
+                _ => "badge-secondary",
+            };
+
+        public string StatusDisplayName =>
+            Status switch
+            {
+                "active" => "Đang bán",
+                "inactive" => "Ngừng bán",
+                "draft" => "Bản nháp",
+                "pending" => "Chờ duyệt",
+                _ => Status,
+            };
+
+        public int TotalStock => Variants.Sum(v => v.Stock);
+        public decimal MinPrice => Variants.Any() ? Variants.Min(v => v.Price) : BasePrice;
+        public decimal MaxPrice => Variants.Any() ? Variants.Max(v => v.Price) : BasePrice;
+    }
 }
