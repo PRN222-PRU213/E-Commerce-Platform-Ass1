@@ -19,7 +19,17 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<ServiceResult<OrderDetailDto>> GetOrderDetailAsync(Guid orderId, Guid shopId);
 
         /// <summary>
-        /// Xác nhận đơn hàng
+        /// Bắt đầu xử lý đơn hàng (Pending → Processing)
+        /// </summary>
+        Task<ServiceResult> StartProcessingAsync(Guid orderId, Guid shopId);
+
+        /// <summary>
+        /// Bắt đầu chuẩn bị hàng (Processing → Preparing)
+        /// </summary>
+        Task<ServiceResult> StartPreparingAsync(Guid orderId, Guid shopId);
+
+        /// <summary>
+        /// Xác nhận đơn hàng (Legacy - để tương thích)
         /// </summary>
         Task<ServiceResult> ConfirmOrderAsync(Guid orderId, Guid shopId);
 

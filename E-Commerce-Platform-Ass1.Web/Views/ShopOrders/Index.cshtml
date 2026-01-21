@@ -95,16 +95,19 @@
         <div class="card-body">
             <div class="d-flex flex-wrap gap-2">
                 <a asp-action="Index" class="btn @(string.IsNullOrEmpty(currentStatus) ? "btn-primary" : "btn-outline-primary")">
-                    Tất cả
+                    <i class="fas fa-list"></i> Tất cả
                 </a>
                 <a asp-action="Index" asp-route-status="Pending" class="btn @(currentStatus == "Pending" ? "btn-warning" : "btn-outline-warning")">
-                    <i class="fas fa-clock"></i> Chờ xác nhận
+                    <i class="fas fa-clock"></i> Chờ xử lý
                 </a>
-                <a asp-action="Index" asp-route-status="Confirmed" class="btn @(currentStatus == "Confirmed" ? "btn-info" : "btn-outline-info")">
-                    <i class="fas fa-check"></i> Đã xác nhận
+                <a asp-action="Index" asp-route-status="Processing" class="btn @(currentStatus == "Processing" ? "btn-info" : "btn-outline-info")">
+                    <i class="fas fa-cog"></i> Đang xử lý
+                </a>
+                <a asp-action="Index" asp-route-status="Preparing" class="btn @(currentStatus == "Preparing" ? "btn-primary" : "btn-outline-primary")">
+                    <i class="fas fa-box-open"></i> Chuẩn bị hàng
                 </a>
                 <a asp-action="Index" asp-route-status="Shipped" class="btn @(currentStatus == "Shipped" ? "btn-primary" : "btn-outline-primary")">
-                    <i class="fas fa-shipping-fast"></i> Đang giao
+                    <i class="fas fa-shipping-fast"></i> Vận chuyển
                 </a>
                 <a asp-action="Index" asp-route-status="Completed" class="btn @(currentStatus == "Completed" ? "btn-success" : "btn-outline-success")">
                     <i class="fas fa-check-circle"></i> Hoàn thành
@@ -154,16 +157,16 @@
                                         @switch (order.Status)
                                         {
                                             case "Pending":
-                                                <span class="badge badge-warning">Chờ xác nhận</span>
-                                                break;
-                                            case "Confirmed":
-                                                <span class="badge badge-info">Đã xác nhận</span>
-                                                break;
-                                            case "Shipped":
-                                                <span class="badge badge-primary">Đang giao</span>
+                                                <span class="badge badge-warning">Chờ xử lý</span>
                                                 break;
                                             case "Processing":
-                                                <span class="badge badge-primary">Đang xử lý</span>
+                                                <span class="badge badge-info">Đang xử lý</span>
+                                                break;
+                                            case "Preparing":
+                                                <span class="badge badge-primary">Chuẩn bị hàng</span>
+                                                break;
+                                            case "Shipped":
+                                                <span class="badge badge-primary">Vận chuyển</span>
                                                 break;
                                             case "Completed":
                                                 <span class="badge badge-success">Hoàn thành</span>

@@ -98,7 +98,61 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         /// <summary>
-        /// POST /ShopOrders/Confirm/{id} - Xác nhận đơn hàng
+        /// POST /ShopOrders/StartProcessing/{id} - Bắt đầu xử lý đơn hàng
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StartProcessing(Guid id)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _shopOrderService.StartProcessingAsync(id, shopId.Value);
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Đã bắt đầu xử lý đơn hàng!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("Detail", new { id });
+        }
+
+        /// <summary>
+        /// POST /ShopOrders/StartPreparing/{id} - Chuyển sang chuẩn bị hàng
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StartPreparing(Guid id)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _shopOrderService.StartPreparingAsync(id, shopId.Value);
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Đã chuyển sang chuẩn bị hàng!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("Detail", new { id });
+        }
+
+        /// <summary>
+        /// POST /ShopOrders/Confirm/{id} - Xác nhận đơn hàng (Legacy - để tương thích)
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -130,6 +130,75 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return ServiceResult<OrderDetailDto>.Success(dto);
         }
 
+        /// <summary>
+        /// Bắt đầu xử lý đơn hàng: Pending → Processing
+        /// </summary>
+        public async Task<ServiceResult> StartProcessingAsync(Guid orderId, Guid shopId)
+        {
+            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            if (order == null)
+            {
+                return ServiceResult.Failure("Đơn hàng không tồn tại.");
+            }
+
+            // Kiểm tra quyền
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
+            if (!hasShopItem)
+            {
+                return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
+            }
+
+            // Chấp nhận Pending hoặc PAID (từ checkout cũ)
+            var status = order.Status?.Trim().ToLower();
+            if (status != "pending" && status != "paid")
+            {
+                return ServiceResult.Failure(
+                    $"Chỉ có thể xử lý đơn hàng đang chờ. Status hiện tại: {order.Status}"
+                );
+            }
+
+            order.Status = "Processing";
+            await _orderRepository.UpdateAsync(order);
+
+            return ServiceResult.Success();
+        }
+
+        /// <summary>
+        /// Chuyển sang chuẩn bị hàng: Processing → Preparing
+        /// </summary>
+        public async Task<ServiceResult> StartPreparingAsync(Guid orderId, Guid shopId)
+        {
+            var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
+            if (order == null)
+            {
+                return ServiceResult.Failure("Đơn hàng không tồn tại.");
+            }
+
+            // Kiểm tra quyền
+            var hasShopItem = order.OrderItems.Any(oi =>
+                oi.ProductVariant?.Product?.ShopId == shopId
+            );
+            if (!hasShopItem)
+            {
+                return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
+            }
+
+            var status = order.Status?.Trim().ToLower();
+            if (status != "processing")
+            {
+                return ServiceResult.Failure(
+                    $"Chỉ có thể chuẩn bị hàng khi đơn đang xử lý. Status hiện tại: {order.Status}"
+                );
+            }
+
+            order.Status = "Preparing";
+            await _orderRepository.UpdateAsync(order);
+
+            return ServiceResult.Success();
+        }
+
         public async Task<ServiceResult> ConfirmOrderAsync(Guid orderId, Guid shopId)
         {
             var order = await _orderRepository.GetByIdWithItemsAsync(orderId);
@@ -147,9 +216,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
             }
 
-            if (order.Status != "Pending")
+            var statusConfirm = order.Status?.Trim().ToLower();
+            if (statusConfirm != "pending" && statusConfirm != "paid")
             {
-                return ServiceResult.Failure("Chỉ có thể xác nhận đơn hàng đang chờ xử lý.");
+                return ServiceResult.Failure(
+                    $"Chỉ có thể xác nhận đơn hàng đang chờ xử lý. Status hiện tại: {order.Status}"
+                );
             }
 
             order.Status = "Confirmed";
@@ -182,9 +254,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
             }
 
-            if (order.Status != "Confirmed")
+            var statusShip = order.Status?.Trim().ToLower();
+            if (statusShip != "preparing" && statusShip != "confirmed")
             {
-                return ServiceResult.Failure("Chỉ có thể gửi hàng cho đơn hàng đã xác nhận.");
+                return ServiceResult.Failure(
+                    $"Chỉ có thể gửi hàng khi đơn đang chuẩn bị. Status hiện tại: {order.Status}"
+                );
             }
 
             // Validate input
@@ -237,38 +312,26 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
             }
 
-            if (order.Status != "Confirmed" && order.Status != "Processing")
+            var statusUpdate = order.Status?.Trim().ToLower();
+            if (statusUpdate != "shipped" && statusUpdate != "shipping")
             {
-                return ServiceResult.Failure("Đơn hàng chưa được xác nhận hoặc đã hoàn thành.");
+                return ServiceResult.Failure(
+                    $"Chỉ có thể cập nhật vận chuyển khi đơn đang giao. Status hiện tại: {order.Status}"
+                );
             }
 
-            // Cập nhật trạng thái order
-            order.Status = "Processing";
-            await _orderRepository.UpdateAsync(order);
-
-            // Tạo hoặc cập nhật shipment
+            // Cập nhật shipment
             var shipment = order.Shipments?.FirstOrDefault();
             if (shipment == null)
             {
-                shipment = new Shipment
-                {
-                    Id = Guid.NewGuid(),
-                    OrderId = orderId,
-                    Carrier = dto.Carrier,
-                    TrackingCode = dto.TrackingCode,
-                    Status = dto.Status,
-                    UpdatedAt = DateTime.Now,
-                };
-                await _shipmentRepository.AddAsync(shipment);
+                return ServiceResult.Failure("Không tìm thấy thông tin vận chuyển.");
             }
-            else
-            {
-                shipment.Carrier = dto.Carrier;
-                shipment.TrackingCode = dto.TrackingCode;
-                shipment.Status = dto.Status;
-                shipment.UpdatedAt = DateTime.Now;
-                await _shipmentRepository.UpdateAsync(shipment);
-            }
+
+            shipment.Carrier = dto.Carrier;
+            shipment.TrackingCode = dto.TrackingCode;
+            shipment.Status = dto.Status;
+            shipment.UpdatedAt = DateTime.Now;
+            await _shipmentRepository.UpdateAsync(shipment);
 
             return ServiceResult.Success();
         }
@@ -291,10 +354,11 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             // Kiểm tra trạng thái - chỉ cho phép khi đang shipped
-            if (order.Status != "Shipped" && order.Status != "Processing")
+            var statusDelivered = order.Status?.Trim().ToLower();
+            if (statusDelivered != "shipped" && statusDelivered != "shipping")
             {
                 return ServiceResult.Failure(
-                    "Chỉ có thể đánh dấu giao hàng cho đơn hàng đang vận chuyển."
+                    $"Chỉ có thể đánh dấu giao hàng cho đơn hàng đang vận chuyển. Status hiện tại: {order.Status}"
                 );
             }
 
@@ -331,9 +395,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Đơn hàng không thuộc shop của bạn.");
             }
 
-            if (order.Status != "Pending" && order.Status != "Confirmed")
+            var statusReject = order.Status?.Trim().ToLower();
+            if (statusReject != "pending" && statusReject != "paid")
             {
-                return ServiceResult.Failure("Không thể từ chối đơn hàng đã được xử lý.");
+                return ServiceResult.Failure(
+                    $"Chỉ có thể từ chối đơn hàng đang chờ xử lý. Status hiện tại: {order.Status}"
+                );
             }
 
             order.Status = "Cancelled";
@@ -350,15 +417,27 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return new ShopOrderStatistics
             {
                 TotalOrders = orderList.Count,
-                PendingOrders = orderList.Count(o => o.Status == "Pending"),
-                ConfirmedOrders = orderList.Count(o => o.Status == "Confirmed"),
-                ShippingOrders = orderList.Count(o =>
-                    o.Status == "Shipped" || o.Status == "Processing"
+                PendingOrders = orderList.Count(o =>
+                    o.Status?.ToLower() == "pending" || o.Status?.ToLower() == "paid"
                 ),
-                DeliveredOrders = orderList.Count(o => o.Status == "Completed"),
-                CancelledOrders = orderList.Count(o => o.Status == "Cancelled"),
+                ConfirmedOrders = orderList.Count(o =>
+                    o.Status?.ToLower() == "processing"
+                    || o.Status?.ToLower() == "preparing"
+                    || o.Status?.ToLower() == "confirmed"
+                ),
+                ShippingOrders = orderList.Count(o =>
+                    o.Status?.ToLower() == "shipped" || o.Status?.ToLower() == "shipping"
+                ),
+                DeliveredOrders = orderList.Count(o =>
+                    o.Status?.ToLower() == "completed" || o.Status?.ToLower() == "delivered"
+                ),
+                CancelledOrders = orderList.Count(o =>
+                    o.Status?.ToLower() == "cancelled" || o.Status?.ToLower() == "rejected"
+                ),
                 TotalRevenue = orderList
-                    .Where(o => o.Status == "Completed")
+                    .Where(o =>
+                        o.Status?.ToLower() == "completed" || o.Status?.ToLower() == "delivered"
+                    )
                     .Sum(o => o.TotalAmount),
             };
         }

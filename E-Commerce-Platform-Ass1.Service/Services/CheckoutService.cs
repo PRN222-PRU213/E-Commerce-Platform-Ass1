@@ -16,8 +16,12 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemtRepository _orderItemtRepository;
 
-        public CheckoutService(ICartRepository cartRepository, ICartItemRepository cartItemRepository,
-            IOrderRepository orderRepository, IOrderItemtRepository orderItemtRepository)
+        public CheckoutService(
+            ICartRepository cartRepository,
+            ICartItemRepository cartItemRepository,
+            IOrderRepository orderRepository,
+            IOrderItemtRepository orderItemtRepository
+        )
         {
             _cartRepository = cartRepository;
             _cartItemRepository = cartItemRepository;
@@ -41,21 +45,22 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ShippingAddress = shippingAddress,
                 Status = "PAID",
                 CreatedAt = DateTime.Now,
-                TotalAmount = cart.CartItems.Sum(ci =>
-                    ci.ProductVariant.Price * ci.Quantity)
+                TotalAmount = cart.CartItems.Sum(ci => ci.ProductVariant.Price * ci.Quantity),
             };
 
             await _orderRepository.AddAsync(order);
 
-            var orderItems = cart.CartItems.Select(ci => new OrderItem
-            {
-                Id = Guid.NewGuid(),
-                OrderId = order.Id,
-                ProductVariantId = ci.ProductVariantId,
-                ProductName = ci.ProductVariant.VariantName,
-                Price = ci.ProductVariant.Price,
-                Quantity = ci.Quantity
-            }).ToList();
+            var orderItems = cart
+                .CartItems.Select(ci => new OrderItem
+                {
+                    Id = Guid.NewGuid(),
+                    OrderId = order.Id,
+                    ProductVariantId = ci.ProductVariantId,
+                    ProductName = ci.ProductVariant.VariantName,
+                    Price = ci.ProductVariant.Price,
+                    Quantity = ci.Quantity,
+                })
+                .ToList();
 
             await _orderItemtRepository.AddRangeAsync(orderItems);
 
