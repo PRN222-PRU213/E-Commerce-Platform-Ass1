@@ -33,17 +33,16 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<Order?> GetByIdWithItemsAsync(Guid orderId)
         {
-            
-            return await _context.Orders
-                .Include(o => o.OrderItems)
+            return await _context
+                .Orders.Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
         public async Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId)
         {
-            return await _context.Orders
-                .Where(o => o.UserId == userId)
-                .ToListAsync();
+            return await _context.Orders.Where(o => o.UserId == userId).ToListAsync();
         }
 
         public async Task<Order> UpdateAsync(Order order)
@@ -55,10 +54,10 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
 
         public async Task<Order?> GetByIdWithDetailsAsync(Guid orderId)
         {
-            return await _context.Orders
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                        .ThenInclude(pv => pv.Product)
+            return await _context
+                .Orders.Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
                 .Include(o => o.Payments)
                 .Include(o => o.Shipments)
                 .Include(o => o.User)
@@ -68,10 +67,10 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
         public async Task<IEnumerable<Order>> GetByShopIdAsync(Guid shopId)
         {
             // Lấy đơn hàng có ít nhất 1 sản phẩm thuộc shop
-            return await _context.Orders
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                        .ThenInclude(pv => pv.Product)
+            return await _context
+                .Orders.Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
                 .Include(o => o.Shipments)
                 .Include(o => o.User)
                 .Where(o => o.OrderItems.Any(oi => oi.ProductVariant.Product.ShopId == shopId))
