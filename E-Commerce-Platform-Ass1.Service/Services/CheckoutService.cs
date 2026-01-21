@@ -25,7 +25,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             _orderItemtRepository = orderItemtRepository;
         }
 
-        public async Task<Guid> CheckoutSuccessAsync(Guid userId, string shippingAddress)
+        public async Task<Order> CheckoutSuccessAsync(Guid userId, string shippingAddress)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
 
@@ -63,7 +63,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             await _cartRepository.DeleteAsync(cart);
 
-            return order.Id;
+            return order;
         }
     }
 }
