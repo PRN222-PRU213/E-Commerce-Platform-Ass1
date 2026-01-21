@@ -49,5 +49,34 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return Forbid();
             }
         }
+
+        [HttpPut("{cartItemId}")]
+        public async Task<IActionResult> UpdateQuantityItemAsync(Guid cartItemId, int quantity)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return RedirectToAction("Login", "Authentication", new { returnUrl = Url.Action("Index", "Cart") });
+            }
+
+            if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+
+            var isUpdated = await _cartService.UpdateQuantityAsync(cartItemId, quantity);
+            if (!isUpdated) return NotFound(new { message = "Sản phẩm không tồn tại." });
+            
+            var updatedItem = await _cartService.GetCartItemAsync(cartItemId);
+            var cartTotal = await _cartService.GetCartTotalAsync(userId);
+
+            return Ok(new
+            {
+                success = true,
+                quantity = updatedItem.Quantity,
+                lineTotal = updatedItem.Quantity * updatedItem.ProductVariant.Price,
+                cartTotal = cartTotal
+            });
+        }
     }
 }

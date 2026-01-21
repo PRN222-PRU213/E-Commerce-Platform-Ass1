@@ -18,5 +18,19 @@
 
         // Navigation property
         public Order Order { get; set; } = null!;
+
+        public Payment(Guid orderId, decimal amount)
+        {
+            string datePart = DateTime.Now.ToString("ddMMyyyy");
+            string guidPart = orderId.ToString("N").Substring(0, 8).ToUpper();
+
+            Id = Guid.NewGuid();
+            OrderId = orderId;
+            Method = "Thanh toán bằng ví MoMo.";
+            Amount = amount;
+            Status = "Completed";
+            TransactionCode = $"TXN-{datePart}-{guidPart}";
+            PaidAt = DateTime.Now;
+        }
     }
 }

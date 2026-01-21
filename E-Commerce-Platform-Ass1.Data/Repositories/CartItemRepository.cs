@@ -26,10 +26,10 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteByCartIdAsync(Guid cartId)
+        public async Task DeleteByIdsAsync(IEnumerable<Guid> cartItemIds)
         {
             var items = await _context.CartItems
-                .Where(c => c.CartId == cartId)
+                .Where(ci => cartItemIds.Contains(ci.Id))
                 .ToListAsync();
 
             _context.CartItems.RemoveRange(items);
@@ -54,7 +54,16 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
         {
             return await _context.CartItems
                 .Include(c => c.Cart)
+                .Include(ci => ci.ProductVariant)
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<IEnumerable<CartItem>> GetItemByIdsAsync(IEnumerable<Guid> cartItemIds)
+        {
+            return await _context.CartItems
+                .Where(ci => cartItemIds.Contains(ci.Id))
+                .Include(ci => ci.ProductVariant)
+                .ToListAsync();
         }
 
         public async Task UpdateAsync(CartItem cartItem)

@@ -9,6 +9,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
     public interface ICheckoutService
     {
-        Task<Order> CheckoutSuccessAsync(Guid userId, string shippingAddress);
+        Task<Order> CheckoutSuccessAsync(Guid userId, string shippingAddress, List<Guid> selectedCartItemIds);
     }
 }

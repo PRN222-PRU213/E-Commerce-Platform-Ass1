@@ -38,22 +38,31 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             {
                 // ✅ LẤY ĐỊA CHỈ TỪ SESSION
                 var shippingAddress = HttpContext.Session.GetString("ShippingAddress");
+                var selectedIdsStr = HttpContext.Session.GetString("SelectedCartItemIds");
 
-                if (string.IsNullOrEmpty(shippingAddress))
+                if (string.IsNullOrEmpty(shippingAddress) || string.IsNullOrEmpty(selectedIdsStr))
                 {
                     ViewBag.IsSuccess = false;
                     ViewBag.Message = "Không tìm thấy địa chỉ giao hàng.";
                     return View();
                 }
 
-                var newOrder = await _checkoutService.CheckoutSuccessAsync(userId, shippingAddress);
+                var selectedCartItemIds = selectedIdsStr
+                    .Split(',')
+                    .Select(Guid.Parse)
+                    .ToList();
+
+                var newOrder = await _checkoutService.CheckoutSuccessAsync(userId, shippingAddress, selectedCartItemIds);
 
                 // Xóa session sau khi dùng
                 HttpContext.Session.Remove("ShippingAddress");
+                HttpContext.Session.Remove("SelectedCartItemIds");
 
                 ViewBag.IsSuccess = true;
-                ViewBag.Message = $"Thanh toán thành công! Mã đơn hàng: {newOrder.Id}\n" + 
-                    $"Tổng tiền: {newOrder.TotalAmount}";
+                ViewBag.Message =
+                    $"Thanh toán thành công!<br/>" +
+                    $"Mã đơn hàng: {newOrder.Id}<br/>" +
+                    $"Tổng tiền: {newOrder.TotalAmount:N0} VNĐ";
             }
             else
             {

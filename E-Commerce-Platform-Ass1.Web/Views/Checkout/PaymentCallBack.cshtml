@@ -93,7 +93,7 @@
 		</h2>
 
 		<p>Xin chào <strong>@ViewBag.UserName</strong></p>
-		<p class="message">@message</p>
+		<p class="message">@Html.Raw(message)</p>
 
 		<div class="action">
 			@if (isSuccess)

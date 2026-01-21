@@ -1,4 +1,5 @@
-﻿using E_Commerce_Platform_Ass1.Service.DTO.Response;
+﻿using E_Commerce_Platform_Ass1.Data.Database.Entities;
+using E_Commerce_Platform_Ass1.Service.DTO.Response;
 
 namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
@@ -13,5 +14,8 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
         Task<int> GetTotalItemCountAsync(Guid userId);
 
         Task<bool> RemoveItemAsync(Guid userId, Guid cartItemId);
+        Task<bool> UpdateQuantityAsync(Guid cartItemId, int quantity);
+        Task<CartItem> GetCartItemAsync(Guid cartItemId);
+        Task<IEnumerable<CartItem>> GetCartItemsByIdsAsync(IEnumerable<Guid> cartItemIds);
     }
 }

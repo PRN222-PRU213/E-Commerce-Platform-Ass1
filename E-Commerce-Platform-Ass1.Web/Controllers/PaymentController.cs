@@ -17,8 +17,23 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PayWithMomo(string shippingAddress)
+        public async Task<IActionResult> PayWithMomo(string shippingAddress, string selectedCartItemIds)
         {
+            if (string.IsNullOrWhiteSpace(selectedCartItemIds))
+            {
+                TempData["Error"] = "Vui lòng chọn sản phẩm để thanh toán";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            var cartItemIds = selectedCartItemIds
+                .Split(',')
+                .Select(Guid.Parse)
+                .ToList();
+
+            var selectedItems = await _cartService.GetCartItemsByIdsAsync(cartItemIds);
+
+            var totalAmount = selectedItems.Sum(x => x.Quantity * x.ProductVariant.Price);
+
             if (string.IsNullOrWhiteSpace(shippingAddress))
             {
                 TempData["Error"] = "Vui lòng nhập địa chỉ giao hàng";
@@ -27,6 +42,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             // ✅ Lưu vào Session
             HttpContext.Session.SetString("ShippingAddress", shippingAddress);
+            HttpContext.Session.SetString("SelectedCartItemIds", selectedCartItemIds);
 
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
@@ -38,7 +54,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            long amount = (long)cart.TotalPrice;
+            long amount = (long)totalAmount;
 
             if (amount <= 0)
             {

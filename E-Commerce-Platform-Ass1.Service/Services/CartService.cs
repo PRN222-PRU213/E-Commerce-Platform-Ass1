@@ -38,6 +38,21 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
         }
 
+        public async Task<CartItem> GetCartItemAsync(Guid cartItemId)
+        {
+            return await _cartItemRepository.GetByIdAsync(cartItemId);
+        }
+
+        public async Task<IEnumerable<CartItem>> GetCartItemsByIdsAsync(IEnumerable<Guid> cartItemIds)
+        {
+            if (cartItemIds == null || !cartItemIds.Any())
+            {
+                return Enumerable.Empty<CartItem>();
+            }
+
+            return await _cartItemRepository.GetItemByIdsAsync(cartItemIds);
+        }
+
         public async Task<decimal> GetCartTotalAsync(Guid userId)
         {
             return await _cartRepository.GetCartTotalAsync(userId);
@@ -92,6 +107,18 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             }
 
             await _cartItemRepository.DeleteAsync(item);
+            return true;
+        }
+
+        public async Task<bool> UpdateQuantityAsync(Guid cartItemId, int quantity)
+        {
+            var cartItem = await _cartItemRepository.GetByIdAsync(cartItemId);
+            if (cartItem == null)
+            {
+                return false;
+            }
+
+            await _cartItemRepository.UpdateQuantityAsync(cartItemId, quantity);
             return true;
         }
     }

@@ -15,23 +15,35 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly ICartItemRepository _cartItemRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderItemtRepository _orderItemtRepository;
+        private readonly IPaymentRepository _paymentRepository;
 
         public CheckoutService(ICartRepository cartRepository, ICartItemRepository cartItemRepository,
-            IOrderRepository orderRepository, IOrderItemtRepository orderItemtRepository)
+            IOrderRepository orderRepository, IOrderItemtRepository orderItemtRepository,
+            IPaymentRepository paymentRepository)
         {
             _cartRepository = cartRepository;
             _cartItemRepository = cartItemRepository;
             _orderRepository = orderRepository;
             _orderItemtRepository = orderItemtRepository;
+            _paymentRepository = paymentRepository;
         }
 
-        public async Task<Order> CheckoutSuccessAsync(Guid userId, string shippingAddress)
+        public async Task<Order> CheckoutSuccessAsync(Guid userId, string shippingAddress, List<Guid> selectedCartItemIds)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
 
             if (cart == null || !cart.CartItems.Any())
             {
                 throw new Exception("Cart is empty");
+            }
+
+            var selectItems = cart.CartItems
+                .Where(ci => selectedCartItemIds.Contains(ci.Id))
+                .ToList();
+
+            if (!selectItems.Any())
+            {
+                throw new Exception("No selected items");
             }
 
             var order = new Order
@@ -41,13 +53,13 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 ShippingAddress = shippingAddress,
                 Status = "PAID",
                 CreatedAt = DateTime.Now,
-                TotalAmount = cart.CartItems.Sum(ci =>
+                TotalAmount = selectItems.Sum(ci =>
                     ci.ProductVariant.Price * ci.Quantity)
             };
 
             await _orderRepository.AddAsync(order);
 
-            var orderItems = cart.CartItems.Select(ci => new OrderItem
+            var orderItems = selectItems.Select(ci => new OrderItem
             {
                 Id = Guid.NewGuid(),
                 OrderId = order.Id,
@@ -59,9 +71,21 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             await _orderItemtRepository.AddRangeAsync(orderItems);
 
-            await _cartItemRepository.DeleteByCartIdAsync(cart.Id);
+            var payment = new Payment(order.Id, order.TotalAmount);
 
-            await _cartRepository.DeleteAsync(cart);
+            await _paymentRepository.AddAsync(payment);
+
+            await _cartItemRepository.DeleteByIdsAsync(
+                selectItems.Select(ci => ci.Id).ToList());
+
+            var remainingItems = cart.CartItems
+                .Where(ci => !selectedCartItemIds.Contains(ci.Id))
+                .ToList();
+
+            if (!remainingItems.Any())
+            {
+                await _cartRepository.DeleteAsync(cart);
+            }
 
             return order;
         }
