@@ -281,13 +281,15 @@
                                     alert(result.message || 'Có lỗi xảy ra khi xóa sản phẩm.');
                                 }
                             },
-                            error: function () {
-                                alert('Không thể kết nối tới máy chủ. Vui lòng thử lại sau.');
+                            error: function (xhr, status, error) {
+                                console.error('Status:', status);
+                                console.error('Error:', error);
+                                console.error('Response:', xhr.responseText);
+                                alert('Lỗi: ' + (xhr.responseJSON?.message || xhr.responseText || 'Không thể kết nối'));
                             }
                         });
                     }
                 });
-            });
         </script>
 
     <script>
@@ -340,8 +342,17 @@
                             updateTotal();
                         }
                     },
-                    error: function () {
-                        alert('Không thể cập nhật số lượng');
+                    error: function (xhr, status, error) {
+                        console.error('Status:', status);
+                        console.error('Error:', error);
+                        console.error('Response:', xhr.responseText);
+
+                        if (xhr.status === 401) {
+                            alert('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+                            window.location.href = '/Authentication/Login';
+                        } else {
+                            alert('Lỗi: ' + (xhr.responseJSON?.message || 'Không thể cập nhật số lượng'));
+                        }
                     },
                     complete: function () {
                         btn.prop('disabled', false);

@@ -40,6 +40,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     serviceCart
                         ?.Items.Select(i => new Models.CartItemViewModel
                         {
+                            CartItemId = i.CartItemId,
                             ProductId = i.ProductId,
                             ProductName = i.ProductName,
                             ImageUrl = i.ImageUrl,

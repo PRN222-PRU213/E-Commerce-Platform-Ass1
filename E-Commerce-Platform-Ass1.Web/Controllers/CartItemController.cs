@@ -1,4 +1,5 @@
-﻿using E_Commerce_Platform_Ass1.Service.Services.IServices;
+﻿using System.Security.Claims;
+using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E_Commerce_Platform_Ass1.Web.Controllers
@@ -18,10 +19,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
                 {
-                    return RedirectToAction("Login", "Authentication", new { returnUrl = Url.Action("Index", "Cart") });
+                    return Unauthorized(new { success = false, message = "Chưa đăng nhập" });
                 }
 
                 if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
@@ -51,17 +52,17 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         [HttpPut("{cartItemId}")]
-        public async Task<IActionResult> UpdateQuantityItemAsync(Guid cartItemId, int quantity)
+        public async Task<IActionResult> UpdateQuantityItemAsync(Guid cartItemId, [FromQuery]int quantity)
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
-                return RedirectToAction("Login", "Authentication", new { returnUrl = Url.Action("Index", "Cart") });
+                return Unauthorized(new { success = false, message = "Chưa đăng nhập" });
             }
 
             if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
-                return RedirectToAction("Login", "Authentication");
+                return Unauthorized(new { success = false });
             }
 
             var isUpdated = await _cartService.UpdateQuantityAsync(cartItemId, quantity);

@@ -40,6 +40,10 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IAdminService, AdminService>();
             serviceCollection.AddScoped<ICloudinaryService, CloudinaryService>();
             serviceCollection.AddScoped<IShopOrderService, ShopOrderService>();
+            serviceCollection.AddScoped<IMomoService, MomoService>();
+            serviceCollection.AddScoped<ICheckoutService, CheckoutService>();
+            serviceCollection.AddScoped<IOrderService, OrderService>();
+
         }
     }
 }
