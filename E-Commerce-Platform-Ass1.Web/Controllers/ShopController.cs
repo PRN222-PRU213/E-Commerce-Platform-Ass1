@@ -40,9 +40,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             // Lấy danh sách sản phẩm của shop (chỉ sản phẩm đã được duyệt)
             var productsResult = await _productService.GetByShopIdAsync(id);
-            var products = productsResult.IsSuccess && productsResult.Data != null 
-                ? productsResult.Data.Where(p => p.Status == "Active").ToList() 
-                : new List<ProductDto>();
+            var products =
+                productsResult.IsSuccess && productsResult.Data != null
+                    ? productsResult.Data.Where(p => p.Status == "Active").ToList()
+                    : new List<ProductDto>();
 
             ViewBag.Products = products;
             return View(shop);
@@ -62,7 +63,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var hasShop = await _shopService.UserHasShopAsync(userId);
             if (hasShop)
             {
-                TempData["ErrorMessage"] = "Bạn đã có shop rồi. Mỗi tài khoản chỉ được đăng ký một shop.";
+                TempData["ErrorMessage"] =
+                    "Bạn đã có shop rồi. Mỗi tài khoản chỉ được đăng ký một shop.";
                 return RedirectToAction("Profile", "Authentication");
             }
 
@@ -89,7 +91,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var hasShop = await _shopService.UserHasShopAsync(userId);
             if (hasShop)
             {
-                ModelState.AddModelError(string.Empty, "Bạn đã có shop rồi. Mỗi tài khoản chỉ được đăng ký một shop.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Bạn đã có shop rồi. Mỗi tài khoản chỉ được đăng ký một shop."
+                );
                 return View(model);
             }
 
@@ -97,14 +102,18 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             var shopNameExists = await _shopService.ShopNameExistsAsync(model.ShopName.Trim());
             if (shopNameExists)
             {
-                ModelState.AddModelError(nameof(model.ShopName), "Tên shop này đã được sử dụng. Vui lòng chọn tên khác.");
+                ModelState.AddModelError(
+                    nameof(model.ShopName),
+                    "Tên shop này đã được sử dụng. Vui lòng chọn tên khác."
+                );
                 return View(model);
             }
 
             // Tạo shop mới thông qua service layer
             await _shopService.RegisterShopAsync(userId, model.ShopName, model.Description);
 
-            TempData["SuccessMessage"] = "Đăng ký shop thành công! Shop của bạn đang chờ phê duyệt.";
+            TempData["SuccessMessage"] =
+                "Đăng ký shop thành công! Shop của bạn đang chờ phê duyệt.";
             return RedirectToAction("Profile", "Authentication");
         }
 
@@ -127,9 +136,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             // Lấy toàn bộ sản phẩm của shop (tất cả status vì đây là trang quản lý)
             var productsResult = await _productService.GetByShopIdAsync(shop.Id);
-            var products = productsResult.IsSuccess && productsResult.Data != null 
-                ? productsResult.Data.ToList() 
-                : new List<ProductDto>();
+            var products =
+                productsResult.IsSuccess && productsResult.Data != null
+                    ? productsResult.Data.ToList()
+                    : new List<ProductDto>();
 
             ViewBag.Products = products;
             return View(shop);
@@ -158,7 +168,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             // Kiểm tra shop đã được duyệt chưa
             if (shop.Status != "Active")
             {
-                TempData["ErrorMessage"] = "Shop của bạn chưa được duyệt. Vui lòng chờ admin phê duyệt.";
+                TempData["ErrorMessage"] =
+                    "Shop của bạn chưa được duyệt. Vui lòng chờ admin phê duyệt.";
                 return RedirectToAction("ViewShop");
             }
 
