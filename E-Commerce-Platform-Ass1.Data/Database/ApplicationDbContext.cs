@@ -23,6 +23,7 @@ namespace E_Commerce_Platform_Ass1.Data.Database
         public DbSet<Category> Categories { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
+        public DbSet<Refund> Refunds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +43,7 @@ namespace E_Commerce_Platform_Ass1.Data.Database
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new CartItemConfiguration());
             modelBuilder.ApplyConfiguration(new CartConfiguration());
+            modelBuilder.ApplyConfiguration(new RefundConfiguration());
         }
     }
 }

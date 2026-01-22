@@ -5,6 +5,16 @@
 }
 
 <h3 class="mb-4 text-center">📦 Lịch sử đơn hàng</h3>
+@if (TempData["Success"] != null)
+{
+        <div id="successAlert"
+             class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            ✅ @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+}
+
 
 @if (!Model.Items.Any())
 {
@@ -29,6 +39,7 @@ else
                                 <span class="badge 
                             @(item.Status == "PAID" ? "bg-success" :
                               item.Status == "PENDING" ? "bg-warning text-dark" :
+                              item.Status == "CANCELLED" ? "bg-danger" :
                               "bg-secondary")">
                             @item.Status
                                 </span>
@@ -48,13 +59,25 @@ else
                             </div>
 
                             <!-- Action -->
-                            <div class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+
                                 <a asp-controller="Order"
                                    asp-action="Detail"
                                    asp-route-orderId="@item.OrderId"
                                    class="btn btn-sm btn-primary">
                                     Xem chi tiết
                                 </a>
+
+                                            @if (item.Status == "PAID" && !item.IsRefunded)
+                                            {
+                                                <button class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#refundModal"
+                                                        data-order-id="@item.OrderId"
+                                                        data-amount="@item.TotalAmount">
+                                                    Hoàn tiền
+                                                </button>
+                                            }
                             </div>
 
                         </div>
@@ -95,4 +118,73 @@ else
 
             </ul>
         </nav>
+}
+
+                               <!-- Refund Modal -->
+<div class="modal fade" id="refundModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-controller="Refund" asp-action="Refund" method="post" class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận hoàn tiền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" name="orderId" id="refundOrderId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Số tiền hoàn</label>
+                    <input type="number"
+                           class="form-control"
+                           name="amount"
+                           id="refundAmount"
+                           readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Lý do hoàn tiền</label>
+                    <textarea class="form-control"
+                              name="reason"
+                              required></textarea>
+                </div>
+
+                <div class="alert alert-warning small">
+                    ⚠️ Sau khi hoàn tiền, đơn hàng sẽ bị hủy.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">
+                    Xác nhận hoàn tiền
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const refundModal = document.getElementById('refundModal');
+
+    refundModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+
+        const orderId = button.getAttribute('data-order-id');
+        const amount = button.getAttribute('data-amount');
+
+        document.getElementById('refundOrderId').value = orderId;
+        document.getElementById('refundAmount').value = amount;
+    });
+
+        // ===== AUTO HIDE SUCCESS ALERT =====
+        setTimeout(() => {
+            const alertNode = document.getElementById('successAlert');
+            if (alertNode) {
+                const bsAlert = new bootstrap.Alert(alertNode);
+                bsAlert.close();
+            }
+        }, 3000);
+</script>
 }

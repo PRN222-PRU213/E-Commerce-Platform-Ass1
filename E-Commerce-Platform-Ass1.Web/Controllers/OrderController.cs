@@ -38,7 +38,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 OrderDate = o.CreatedAt,
                 TotalAmount = o.TotalAmount,
                 Status = o.Status,
-                ShippingAddress = o.ShippingAddress
+                ShippingAddress = o.ShippingAddress,
+                IsRefunded = false
             })
             .OrderByDescending(o => o.OrderDate)
             .ToList();
@@ -93,6 +94,11 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             };
 
             return View("OrderDetail", orderDetail);
+        }
+
+        public IActionResult OrderHistory()
+        {
+            return View();
         }
     }
 }

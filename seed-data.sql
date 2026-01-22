@@ -8,19 +8,20 @@ USE [ECommercePlatformDB]; -- Database name from appsettings.json
 GO
 
 -- Delete old data (if needed)
--- DELETE FROM reviews;
--- DELETE FROM order_items;
--- DELETE FROM payments;
--- DELETE FROM shipments;
--- DELETE FROM orders;
--- DELETE FROM CartItems;
--- DELETE FROM Carts;
--- DELETE FROM product_variants;
--- DELETE FROM products;
--- DELETE FROM shops;
--- DELETE FROM categories;
--- DELETE FROM users;
--- DELETE FROM roles;
+DELETE FROM reviews;
+DELETE FROM order_items;
+DELETE FROM payments;
+DELETE FROM shipments;
+DELETE FROM orders;
+DELETE FROM CartItems;
+DELETE FROM Carts;
+DELETE FROM product_variants;
+DELETE FROM products;
+DELETE FROM shops;
+DELETE FROM categories;
+DELETE FROM users;
+DELETE FROM roles;
+DELETE FROM Refunds
 -- GO
 
 -- ============================================
@@ -41,16 +42,16 @@ GO
 INSERT INTO users (Id, Name, PasswordHash, Email, RoleId, Status, CreatedAt)
 VALUES
     -- Admin
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Admin User', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'admin@example.com', '11111111-1111-1111-1111-111111111111', 1, GETDATE()),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Admin User', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'admin@example.com', '11111111-1111-1111-1111-111111111111', 1, GETDATE()),
     
     -- Sellers
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Shop Owner 1', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'seller1@example.com', '33333333-3333-3333-3333-333333333333', 1, GETDATE()),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Shop Owner 2', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'seller2@example.com', '33333333-3333-3333-3333-333333333333', 1, GETDATE()),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Shop Owner 1', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'seller1@example.com', '33333333-3333-3333-3333-333333333333', 1, GETDATE()),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Shop Owner 2', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'seller2@example.com', '33333333-3333-3333-3333-333333333333', 1, GETDATE()),
     
     -- Customers
-    ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Customer 1', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'customer1@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE()),
-    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'Customer 2', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'customer2@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE()),
-    ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'Customer 3', '$2a$11$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdOOXvQbyQ.Y9ibzXjVmhQw7b6O', 'customer3@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE());
+    ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Customer 1', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'customer1@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE()),
+    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'Customer 2', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'customer2@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE()),
+    ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'Customer 3', '$2a$11$tVSQZ.QyXTekMK9jnqwhWuM69Hnwiubpy1whI.uLRR4.HYRaJPwwC', 'customer3@example.com', '22222222-2222-2222-2222-222222222222', 1, GETDATE());
 GO
 
 -- ============================================
@@ -97,15 +98,15 @@ INSERT INTO product_variants (Id, ProductId, VariantName, Price, Size, Color, St
 VALUES
     -- iPhone 15 Pro variants
     ('40000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'iPhone 15 Pro 128GB - Titanium Blue', 25000000, '', 'Blue', 50, 'IP15P-128-BLUE', 'Active', 'https://example.com/iphone15-blue.jpg'),
-    ('40000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000001', 'iPhone 15 Pro 256GB - Titanium Blue', 28000000, '', 'Blue', 30, 'IP15P-256-BLUE', 'Active', 'https://example.com/iphone15-blue.jpg'),
+    ('40000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000001', 'iPhone 15 Pro 256GB - Titanium Blue', 28000000, '', 'White', 30, 'IP15P-256-BLUE', 'Active', 'https://example.com/iphone15-blue.jpg'),
     ('40000000-0000-0000-0000-000000000003', '30000000-0000-0000-0000-000000000001', 'iPhone 15 Pro 128GB - Titanium Black', 25000000, '', 'Black', 40, 'IP15P-128-BLACK', 'Active', 'https://example.com/iphone15-black.jpg'),
     
     -- Samsung Galaxy S24 variants
-    ('40000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000002', 'Galaxy S24 256GB - Phantom Black', 22000000, '', 'Black', 35, 'GS24-256-BLACK', 'Active', 'https://example.com/galaxy-s24-black.jpg'),
+    ('40000000-0000-0000-0000-000000000004', '30000000-0000-0000-0000-000000000002', 'Galaxy S24 256GB - Phantom Black', 22000000, '', 'White', 35, 'GS24-256-BLACK', 'Active', 'https://example.com/galaxy-s24-black.jpg'),
     ('40000000-0000-0000-0000-000000000005', '30000000-0000-0000-0000-000000000002', 'Galaxy S24 512GB - Phantom Black', 25000000, '', 'Black', 20, 'GS24-512-BLACK', 'Active', 'https://example.com/galaxy-s24-black.jpg'),
     
     -- MacBook Pro variants
-    ('40000000-0000-0000-0000-000000000006', '30000000-0000-0000-0000-000000000003', 'MacBook Pro M3 14" 512GB', 45000000, '14 inch', 'Space Gray', 15, 'MBP-M3-14-512', 'Active', 'https://example.com/macbook-pro.jpg'),
+    ('40000000-0000-0000-0000-000000000006', '30000000-0000-0000-0000-000000000003', 'MacBook Pro M3 14" 512GB', 45000000, '14 inch', 'Space White', 15, 'MBP-M3-14-512', 'Active', 'https://example.com/macbook-pro.jpg'),
     ('40000000-0000-0000-0000-000000000007', '30000000-0000-0000-0000-000000000003', 'MacBook Pro M3 16" 1TB', 55000000, '16 inch', 'Space Gray', 10, 'MBP-M3-16-1TB', 'Active', 'https://example.com/macbook-pro.jpg'),
     
     -- Men Shirt variants
@@ -196,22 +197,11 @@ VALUES
     ('B0000000-0000-0000-0000-000000000002', 'dddddddd-dddd-dddd-dddd-dddddddddddd', '30000000-0000-0000-0000-000000000004', '80000000-0000-0000-0000-000000000002', 4, 'Nice shirt, good quality', 'Approved', 0, 0, NULL, NULL, NULL, DATEADD(day, -4, GETDATE()));
 GO
 
--- ============================================
--- Completion
--- ============================================
-PRINT 'Seed data has been created successfully!';
-PRINT 'Total records added:';
-PRINT '  - Roles: 3';
-PRINT '  - Users: 6';
-PRINT '  - Categories: 5';
-PRINT '  - Shops: 2';
-PRINT '  - Products: 6';
-PRINT '  - Product Variants: 15';
-PRINT '  - Carts: 2';
-PRINT '  - Cart Items: 3';
-PRINT '  - Orders: 3';
-PRINT '  - Order Items: 4';
-PRINT '  - Payments: 3';
-PRINT '  - Shipments: 3';
-PRINT '  - Reviews: 2';
-GO
+select * from users
+select * from Carts
+select * from CartItems
+select * from orders where UserId = '2FF60FFD-D586-4E4B-8E2B-049F538919F3'
+select * from order_items where OrderId = 'EACDC2EF-376A-4938-B45E-350911AF824F'
+select * from payments
+select * from Refunds
+Update payments set Status = 'PAID' where Id = '9CA8DB48-5D83-4347-8E04-3E71E057DCED'
