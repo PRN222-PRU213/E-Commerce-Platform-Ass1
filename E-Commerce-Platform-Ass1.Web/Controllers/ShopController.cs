@@ -134,5 +134,36 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             ViewBag.Products = products;
             return View(shop);
         }
+
+        /// <summary>
+        /// Trang thống kê doanh thu của Shop
+        /// </summary>
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Statistics()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return RedirectToAction("Login", "Authentication");
+            }
+
+            var shop = await _shopService.GetShopByUserIdAsync(userId);
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop. Vui lòng đăng ký shop trước.";
+                return RedirectToAction("RegisterShop");
+            }
+
+            // Kiểm tra shop đã được duyệt chưa
+            if (shop.Status != "Active")
+            {
+                TempData["ErrorMessage"] = "Shop của bạn chưa được duyệt. Vui lòng chờ admin phê duyệt.";
+                return RedirectToAction("ViewShop");
+            }
+
+            var statistics = await _shopService.GetShopStatisticsAsync(shop.Id);
+            return View(statistics);
+        }
     }
 }
