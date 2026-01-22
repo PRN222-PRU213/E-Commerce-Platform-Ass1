@@ -16,13 +16,15 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IProductVariantRepository _productVariantRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IOrderRepository _orderRepository;
 
         public AdminService(
             IShopRepository shopRepository,
             IProductRepository productRepository,
             IProductVariantRepository productVariantRepository,
             IUserRepository userRepository,
-            ICategoryRepository categoryRepository
+            ICategoryRepository categoryRepository,
+            IOrderRepository orderRepository
         )
         {
             _shopRepository = shopRepository;
@@ -30,6 +32,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             _productVariantRepository = productVariantRepository;
             _userRepository = userRepository;
             _categoryRepository = categoryRepository;
+            _orderRepository = orderRepository;
         }
 
         #region Shop Management
@@ -338,6 +341,16 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             var allShops = (await _shopRepository.GetAllAsync()).ToList();
             var allProducts = (await _productRepository.GetAllAsync()).ToList();
             var allUsers = (await _userRepository.GetAllAsync()).ToList();
+            var allOrders = (await _orderRepository.GetAllWithDetailsAsync()).ToList();
+
+            // Time boundaries
+            var now = DateTime.Now;
+            var startOfWeek = now.AddDays(-(int)now.DayOfWeek).Date;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1);
+
+            // Completed statuses (case-insensitive)
+            var completedStatuses = new[] { "completed", "delivered" };
+            var cancelledStatuses = new[] { "cancelled", "canceled" };
 
             var dto = new AdminDashboardDto
             {
@@ -357,10 +370,204 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 // Users
                 TotalUsers = allUsers.Count,
 
-                // Recent shops (last 5)
+                // Orders Total
+                TotalOrders = allOrders.Count,
+                TotalRevenue = allOrders
+                    .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                    .Sum(o => o.TotalAmount),
+
+                // Weekly Statistics
+                WeeklyOrders = allOrders.Count(o => o.CreatedAt >= startOfWeek),
+                WeeklyRevenue = allOrders
+                    .Where(o =>
+                        o.CreatedAt >= startOfWeek
+                        && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    )
+                    .Sum(o => o.TotalAmount),
+                WeeklyCompletedOrders = allOrders.Count(o =>
+                    o.CreatedAt >= startOfWeek
+                    && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                WeeklyCancelledOrders = allOrders.Count(o =>
+                    o.CreatedAt >= startOfWeek
+                    && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+
+                // Monthly Statistics
+                MonthlyOrders = allOrders.Count(o => o.CreatedAt >= startOfMonth),
+                MonthlyRevenue = allOrders
+                    .Where(o =>
+                        o.CreatedAt >= startOfMonth
+                        && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    )
+                    .Sum(o => o.TotalAmount),
+                MonthlyCompletedOrders = allOrders.Count(o =>
+                    o.CreatedAt >= startOfMonth
+                    && completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+                MonthlyCancelledOrders = allOrders.Count(o =>
+                    o.CreatedAt >= startOfMonth
+                    && cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                ),
+
+                // Initialize lists
                 RecentShops = new List<ShopDto>(),
                 RecentPendingProducts = new List<ProductDto>(),
+                RecentOrders = new List<RecentOrderDto>(),
+                TopShopsByRevenue = new List<ShopSalesStatDto>(),
+                ShopWeeklyStats = new List<ShopSalesStatDto>(),
+                ShopMonthlyStats = new List<ShopSalesStatDto>(),
+                DailySalesStats = new List<DailySalesDto>(),
             };
+
+            // Calculate Daily Sales for last 7 days (for chart)
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = now.AddDays(-i).Date;
+                var dayOrders = allOrders.Where(o => o.CreatedAt.Date == date).ToList();
+                dto.DailySalesStats.Add(
+                    new DailySalesDto
+                    {
+                        Date = date,
+                        DateLabel = date.ToString("dd/MM"),
+                        OrderCount = dayOrders.Count,
+                        Revenue = dayOrders
+                            .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                            .Sum(o => o.TotalAmount),
+                    }
+                );
+            }
+
+            // Calculate Shop Statistics
+            var shopStats = new Dictionary<Guid, ShopSalesStatDto>();
+            foreach (var shop in allShops.Where(s => s.Status == "Active"))
+            {
+                var owner = await _userRepository.GetByIdAsync(shop.UserId);
+                var shopOrders = allOrders
+                    .Where(o =>
+                        o.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                    )
+                    .ToList();
+
+                var stat = new ShopSalesStatDto
+                {
+                    ShopId = shop.Id,
+                    ShopName = shop.ShopName,
+                    OwnerName = owner?.Name,
+                    TotalOrders = shopOrders.Count,
+                    CompletedOrders = shopOrders.Count(o =>
+                        completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                    ),
+                    CancelledOrders = shopOrders.Count(o =>
+                        cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                    ),
+                    PendingOrders = shopOrders.Count(o =>
+                        !completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                        && !cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                    ),
+                    TotalRevenue = shopOrders.Sum(o => o.TotalAmount),
+                    CompletedRevenue = shopOrders
+                        .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                        .Sum(o => o.TotalAmount),
+                    TotalProductsSold = shopOrders
+                        .SelectMany(o => o.OrderItems)
+                        .Where(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                        .Sum(oi => oi.Quantity),
+                };
+                shopStats[shop.Id] = stat;
+            }
+
+            // Top shops by revenue (all time)
+            dto.TopShopsByRevenue = shopStats
+                .Values.OrderByDescending(s => s.CompletedRevenue)
+                .Take(10)
+                .ToList();
+
+            // Shop Weekly Stats
+            foreach (var shop in allShops.Where(s => s.Status == "Active"))
+            {
+                var owner = await _userRepository.GetByIdAsync(shop.UserId);
+                var weeklyOrders = allOrders
+                    .Where(o =>
+                        o.CreatedAt >= startOfWeek
+                        && o.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                    )
+                    .ToList();
+
+                if (weeklyOrders.Any())
+                {
+                    dto.ShopWeeklyStats.Add(
+                        new ShopSalesStatDto
+                        {
+                            ShopId = shop.Id,
+                            ShopName = shop.ShopName,
+                            OwnerName = owner?.Name,
+                            TotalOrders = weeklyOrders.Count,
+                            CompletedOrders = weeklyOrders.Count(o =>
+                                completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                            ),
+                            CancelledOrders = weeklyOrders.Count(o =>
+                                cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                            ),
+                            TotalRevenue = weeklyOrders.Sum(o => o.TotalAmount),
+                            CompletedRevenue = weeklyOrders
+                                .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                                .Sum(o => o.TotalAmount),
+                            TotalProductsSold = weeklyOrders
+                                .SelectMany(o => o.OrderItems)
+                                .Where(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                                .Sum(oi => oi.Quantity),
+                        }
+                    );
+                }
+            }
+            dto.ShopWeeklyStats = dto
+                .ShopWeeklyStats.OrderByDescending(s => s.CompletedRevenue)
+                .Take(10)
+                .ToList();
+
+            // Shop Monthly Stats
+            foreach (var shop in allShops.Where(s => s.Status == "Active"))
+            {
+                var owner = await _userRepository.GetByIdAsync(shop.UserId);
+                var monthlyOrders = allOrders
+                    .Where(o =>
+                        o.CreatedAt >= startOfMonth
+                        && o.OrderItems.Any(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                    )
+                    .ToList();
+
+                if (monthlyOrders.Any())
+                {
+                    dto.ShopMonthlyStats.Add(
+                        new ShopSalesStatDto
+                        {
+                            ShopId = shop.Id,
+                            ShopName = shop.ShopName,
+                            OwnerName = owner?.Name,
+                            TotalOrders = monthlyOrders.Count,
+                            CompletedOrders = monthlyOrders.Count(o =>
+                                completedStatuses.Contains(o.Status?.ToLower() ?? "")
+                            ),
+                            CancelledOrders = monthlyOrders.Count(o =>
+                                cancelledStatuses.Contains(o.Status?.ToLower() ?? "")
+                            ),
+                            TotalRevenue = monthlyOrders.Sum(o => o.TotalAmount),
+                            CompletedRevenue = monthlyOrders
+                                .Where(o => completedStatuses.Contains(o.Status?.ToLower() ?? ""))
+                                .Sum(o => o.TotalAmount),
+                            TotalProductsSold = monthlyOrders
+                                .SelectMany(o => o.OrderItems)
+                                .Where(oi => oi.ProductVariant?.Product?.ShopId == shop.Id)
+                                .Sum(oi => oi.Quantity),
+                        }
+                    );
+                }
+            }
+            dto.ShopMonthlyStats = dto
+                .ShopMonthlyStats.OrderByDescending(s => s.CompletedRevenue)
+                .Take(10)
+                .ToList();
 
             // Get recent shops
             var recentShops = allShops.OrderByDescending(s => s.CreatedAt).Take(5);
@@ -409,6 +616,39 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                         CreatedAt = product.CreatedAt,
                         ShopName = shop?.ShopName,
                         CategoryName = category?.Name,
+                    }
+                );
+            }
+
+            // Get recent orders (last 5)
+            var recentOrders = allOrders.Take(5);
+            foreach (var order in recentOrders)
+            {
+                var shopName = order
+                    .OrderItems.FirstOrDefault()
+                    ?.ProductVariant?.Product?.Shop?.ShopName;
+                if (string.IsNullOrEmpty(shopName) && order.OrderItems.Any())
+                {
+                    var firstItem = order.OrderItems.First();
+                    if (firstItem.ProductVariant?.Product != null)
+                    {
+                        var shop = await _shopRepository.GetByIdAsync(
+                            firstItem.ProductVariant.Product.ShopId
+                        );
+                        shopName = shop?.ShopName;
+                    }
+                }
+
+                dto.RecentOrders.Add(
+                    new RecentOrderDto
+                    {
+                        Id = order.Id,
+                        OrderCode = order.Id.ToString().Substring(0, 8).ToUpper(),
+                        CustomerName = order.User?.Name ?? "N/A",
+                        ShopName = shopName,
+                        TotalAmount = order.TotalAmount,
+                        Status = order.Status ?? "Unknown",
+                        CreatedAt = order.CreatedAt,
                     }
                 );
             }

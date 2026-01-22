@@ -77,5 +77,23 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Order>> GetAllAsync()
+        {
+            return await _context.Orders.OrderByDescending(o => o.CreatedAt).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetAllWithDetailsAsync()
+        {
+            return await _context
+                .Orders.Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(pv => pv.Product)
+                .Include(o => o.User)
+                .Include(o => o.Payments)
+                .Include(o => o.Shipments)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
     }
 }
