@@ -21,5 +21,15 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
             return View(product);
         }
+
+        public async Task<IActionResult> QuickView(Guid id)
+        {
+            var product = await _productService.GetProductWithVariantsAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return PartialView("_ProductVariantPopup", product);
+        }
     }
 }

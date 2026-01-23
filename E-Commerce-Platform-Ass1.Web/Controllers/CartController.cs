@@ -84,6 +84,12 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             TempData["SuccessMessage"] = "Đã thêm sản phẩm vào giỏ hàng thành công!";
 
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+
             return RedirectToAction("Detail", "Product", new { id = productId });
         }
     }
