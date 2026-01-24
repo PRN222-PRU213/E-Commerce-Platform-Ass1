@@ -68,7 +68,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             payment.Status = "Refunded";
             await _paymentRepository.UpdateAsync(payment);
 
-            order.Status = "CANCELLED";
+            order.Status = "Cancelled";
             await _orderRepository.UpdateAsync(order);
 
             var wallet = await _walletRepository.GetByUserIdAsync(order.UserId);

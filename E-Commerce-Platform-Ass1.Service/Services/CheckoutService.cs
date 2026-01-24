@@ -121,7 +121,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Method = walletUsed > 0 && momoAmount > 0 ? "WALLET + MOMO"
                        : walletUsed > 0 ? "WALLET"
                        : "MOMO",
-                Status = "PAID",
+                Status = "Paid",
                 TransactionCode = transactionCode,
                 PaidAt = DateTime.UtcNow
             };

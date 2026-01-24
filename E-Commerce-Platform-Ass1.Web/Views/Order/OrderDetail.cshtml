@@ -61,6 +61,23 @@
         color: white !important;
     }
 
+    /* Custom status colors */
+    .bg-info {
+        background-color: #17a2b8 !important;
+    }
+
+    .bg-purple {
+        background-color: #6f42c1 !important;
+    }
+
+    .bg-primary {
+        background-color: #007bff !important;
+    }
+
+    .bg-success-dark {
+        background-color: #155724 !important;
+    }
+
     .product-table {
         background: white;
         border-radius: 12px;
@@ -190,13 +207,21 @@
                 </div>
                 <div class="info-value">
                     <span class="status-badge 
-                        @(Model.Status == "PAID" ? "bg-success" :
-                          Model.Status == "PENDING" ? "bg-warning" :
-                          Model.Status == "CANCELLED" ? "bg-danger" :
+                        @(Model.Status == "Paid" ? "bg-success" :
+                          Model.Status == "Pending" ? "bg-warning text-dark" :
+                          Model.Status == "Cancelled" ? "bg-danger" :
+                          Model.Status == "Processing" ? "bg-info" :
+                          Model.Status == "Preparing" ? "bg-purple" :
+                          Model.Status == "Shipped" ? "bg-primary" :
+                          Model.Status == "Completed" ? "bg-success-dark" :
                           "bg-secondary")">
-                        @(Model.Status == "PAID" ? "✓ Đã thanh toán" :
-                          Model.Status == "PENDING" ? "⏳ Chờ xử lý" :
-                          Model.Status == "CANCELLED" ? "✗ Đã hủy" :
+                        @(Model.Status == "Paid" ? "✓ Đã thanh toán" :
+                          Model.Status == "Pending" ? "⏳ Chờ xử lý" :
+                          Model.Status == "Cancelled" ? "✗ Đã hủy" :
+                          Model.Status == "Processing" ? "🔄 Đang xử lý" :
+                          Model.Status == "Preparing" ? "📦 Đang chuẩn bị" :
+                          Model.Status == "Shipped" ? "🚚 Đang giao hàng" :
+                          Model.Status == "Completed" ? "✅ Hoàn thành" :
                           Model.Status)
                     </span>
                 </div>

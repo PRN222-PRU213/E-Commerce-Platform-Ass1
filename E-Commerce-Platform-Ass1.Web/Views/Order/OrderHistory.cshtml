@@ -71,6 +71,23 @@
         color: white !important;
     }
 
+    /* Custom status colors */
+    .bg-info {
+        background-color: #17a2b8 !important;
+    }
+
+    .bg-purple {
+        background-color: #6f42c1 !important;
+    }
+
+    .bg-primary {
+        background-color: #007bff !important;
+    }
+
+    .bg-success-dark {
+        background-color: #155724 !important;
+    }
+
     .action-btn {
         padding: 0.5rem 0.85rem;
         border-radius: 6px;
@@ -237,13 +254,21 @@
                             <!-- Status -->
                             <div class="col-2 text-center order-cell" style="justify-content: center;">
                                 <span class="status-badge 
-                                    @(item.Status == "PAID" ? "bg-success" :
-                                      item.Status == "PENDING" ? "bg-warning text-dark" :
-                                      item.Status == "CANCELLED" ? "bg-danger" :
+                                    @(item.Status == "Paid" ? "bg-success" :
+                                      item.Status == "Pending" ? "bg-warning text-dark" :
+                                      item.Status == "Cancelled" ? "bg-danger" :
+                                      item.Status == "Processing" ? "bg-info" :
+                                      item.Status == "Preparing" ? "bg-purple" :
+                                      item.Status == "Shipped" ? "bg-primary" :
+                                      item.Status == "Completed" ? "bg-success-dark" :
                                       "bg-secondary")">
-                                    @(item.Status == "PAID" ? "✓ Đã thanh toán" :
-                                      item.Status == "PENDING" ? "⏳ Chờ xử lý" :
-                                      item.Status == "CANCELLED" ? "✗ Đã hủy" :
+                                    @(item.Status == "Paid" ? "✓ Đã thanh toán" :
+                                      item.Status == "Pending" ? "⏳ Chờ xử lý" :
+                                      item.Status == "Cancelled" ? "✗ Đã hủy" :
+                                      item.Status == "Processing" ? "🔄 Đang xử lý" :
+                                      item.Status == "Preparing" ? "📦 Đang chuẩn bị" :
+                                      item.Status == "Shipped" ? "🚚 Đang giao hàng" :
+                                      item.Status == "Completed" ? "✅ Hoàn thành" :
                                       item.Status)
                                 </span>
                             </div>
@@ -272,7 +297,7 @@
                                         <span>Chi tiết</span>
                                     </a>
 
-                                    @if (item.Status == "CANCELLED")
+                                    @if (item.Status == "Cancelled")
                                     {
                                         <form asp-controller="Order" asp-action="Reorder" asp-route-orderId="@item.OrderId" method="post" class="d-inline">
                                             <button type="submit" class="action-btn btn-reorder" title="Mua lại">
@@ -282,7 +307,7 @@
                                         </form>
                                     }
 
-                                    @if (item.Status == "PAID" && !item.IsRefunded)
+                                    @if (item.Status == "Paid" && !item.IsRefunded)
                                     {
                                         <button class="action-btn btn-refund"
                                                 data-bs-toggle="modal"
