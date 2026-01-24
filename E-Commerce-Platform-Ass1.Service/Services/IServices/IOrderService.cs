@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 
 namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
     public interface IOrderService
     {
-        Task<IEnumerable<Order>> GetOrderHistoryAsync(Guid userId);
-        Task<Order?> GetOrderItemAsync(Guid orderId);
+        Task<IEnumerable<OrderDto>> GetOrderHistoryAsync(Guid userId);
+        Task<OrderDetailDto?> GetOrderItemAsync(Guid orderId);
     }
 }

@@ -27,9 +27,9 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             var order = await _orderService.GetOrderItemAsync(orderId);
-            if (order != null && order.Status == "CANCELLED")
+            if (order != null && order.Status == "Cancelled")
             {
-                foreach (var item in order.OrderItems)
+                foreach (var item in order.Items)
                 {
                     await _cartService.AddToCart(userId, item.ProductVariantId, item.Quantity);
                 }
@@ -113,12 +113,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 ShippingAddress = order.ShippingAddress,
                 Status = order.Status,
                 TotalAmount = order.TotalAmount,
-                Items = order.OrderItems.Select(o => new OrderItemViewModel
+                Items = order.Items.Select(o => new OrderItemViewModel
                 {
                     ProductName = o.ProductName,
-                    ImageUrl = o.ProductVariant.ImageUrl,
+                    ImageUrl = o.ImageUrl ?? string.Empty,
                     Price = o.Price,
                     Quantity = o.Quantity,
+                    Size = o.Size,
+                    Color = o.Color
                 }).ToList()
             };
 

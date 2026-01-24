@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
 namespace E_Commerce_Platform_Ass1.Service.Services
@@ -18,14 +19,59 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             _orderRepository = orderRepository;
         }
 
-        public async Task<IEnumerable<Order>> GetOrderHistoryAsync(Guid userId)
+        public async Task<IEnumerable<OrderDto>> GetOrderHistoryAsync(Guid userId)
         {
-            return await _orderRepository.GetByUserIdAsync(userId);
+            var orders = await _orderRepository.GetByUserIdAsync(userId);
+
+            if (!orders.Any())
+            {
+                throw new Exception("Customer not exists orders.");
+            }
+
+            var orderDtos = orders.Select(o => new OrderDto
+            {
+                Id = o.Id,
+                UserId = o.UserId,
+                TotalAmount = o.TotalAmount,
+                ShippingAddress = o.ShippingAddress,
+                Status = o.Status,
+                CreatedAt = o.CreatedAt
+            }).ToList();
+
+            return orderDtos;
         }
 
-        public async Task<Order?> GetOrderItemAsync(Guid orderId)
+        public async Task<OrderDetailDto?> GetOrderItemAsync(Guid orderId)
         {
-            return await _orderRepository.GetByIdWithDetailsAsync(orderId);
+            var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
+
+            if (order == null)
+            {
+                throw new Exception("Not found.");
+            }
+
+            var orderDto = new OrderDetailDto
+            {
+                Id = order.Id,
+                UserId = order.UserId,
+                TotalAmount = order.TotalAmount,
+                ShippingAddress = order.ShippingAddress,
+                Status = order.Status,
+                CreatedAt = order.CreatedAt,
+                Items = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    Id = oi.Id,
+                    ProductVariantId = oi.ProductVariantId,
+                    ProductName = oi.ProductName,
+                    Size = oi.ProductVariant.Size,
+                    Color = oi.ProductVariant.Color,
+                    Quantity = oi.Quantity,
+                    ImageUrl = oi.ProductVariant.ImageUrl,
+                    Price = oi.Price
+                }).ToList()
+            };
+
+            return orderDto;
         }
     }
 }

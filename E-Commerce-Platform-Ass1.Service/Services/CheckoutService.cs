@@ -56,7 +56,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 ShippingAddress = shippingAddress,
-                Status = "PAID",
+                Status = "Paid",
                 CreatedAt = DateTime.Now,
                 TotalAmount = selectItems.Sum(ci =>
                     ci.ProductVariant.Price * ci.Quantity)
