@@ -6,14 +6,20 @@
 }
 
 <!-- Page Header Start -->
-<div class="container-fluid bg-secondary mb-5">
-    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px">
+<div class="container-fluid bg-secondary mb-3 position-relative">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100px">
+
         <h1 class="font-weight-semi-bold text-uppercase mb-3">Shop Detail</h1>
         <div class="d-inline-flex">
             <p class="m-0"><a asp-controller="Home" asp-action="Index">Home</a></p>
             <p class="m-0 px-2">-</p>
             <p class="m-0">Shop Detail</p>
         </div>
+    </div>
+    <div style="position: absolute; bottom: 10px; left: 20px;">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-sm px-3" style="background-color: #D19C97; border-color: #D19C97; color: #fff;">
+            <i class="fa fa-arrow-left mr-2"></i>QUAY LẠI TRANG CHỦ
+        </a>
     </div>
 </div>
 <!-- Page Header End -->
