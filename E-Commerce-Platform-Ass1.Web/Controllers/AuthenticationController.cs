@@ -40,8 +40,25 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             // Trim and normalize email
             model.Email = model.Email.Trim().ToLowerInvariant();
 
-            var user = await _userService.ValidateUserAsync(model.Email, model.Password);
-            if (user == null)
+            // Check if email is verified first
+            var isVerified = await _userService.IsEmailVerifiedAsync(model.Email);
+            if (!isVerified)
+            {
+                // Check if user exists (email might not exist at all)
+                var user = await _userService.ValidateUserAsync(model.Email, model.Password);
+                if (user == null)
+                {
+                    // Could be wrong password OR unverified email
+                    // For security, show generic message but also check verification
+                    ModelState.AddModelError(string.Empty, "Email chưa được xác thực hoặc thông tin đăng nhập không đúng.");
+                    ViewData["ShowResendLink"] = true;
+                    ViewData["Email"] = model.Email;
+                    return View(model);
+                }
+            }
+
+            var validatedUser = await _userService.ValidateUserAsync(model.Email, model.Password);
+            if (validatedUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng.");
                 return View(model);
@@ -49,10 +66,10 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.NameIdentifier, validatedUser.Id.ToString()),
+                new Claim(ClaimTypes.Name, validatedUser.Name),
+                new Claim(ClaimTypes.Email, validatedUser.Email),
+                new Claim(ClaimTypes.Role, validatedUser.Role),
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -72,7 +89,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             // Redirect Admin to Admin Dashboard
-            if (user.Role == "Admin")
+            if (validatedUser.Role == "Admin")
             {
                 return RedirectToAction("Index", "Admin");
             }
@@ -100,15 +117,87 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             model.Name = model.Name.Trim();
             model.Email = model.Email.Trim().ToLowerInvariant();
 
-            // Try to register - service will check if email exists
-            var success = await _userService.RegisterAsync(model.Name, model.Email, model.Password);
-            if (!success)
+            // Get base URL for verification link
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            // Register with email verification
+            var result = await _userService.RegisterWithVerificationAsync(model.Name, model.Email, model.Password, baseUrl);
+            
+            if (!result.Success)
             {
-                ModelState.AddModelError(nameof(model.Email), "Email này đã được sử dụng.");
+                ModelState.AddModelError(nameof(model.Email), result.ErrorMessage ?? "Đã có lỗi xảy ra.");
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+            // Redirect to verification pending page
+            TempData["Email"] = model.Email;
+            TempData["EmailSent"] = result.EmailSent;
+            return RedirectToAction("VerificationPending");
+        }
+
+        [HttpGet]
+        public IActionResult VerificationPending()
+        {
+            var email = TempData["Email"]?.ToString();
+            var emailSent = TempData["EmailSent"] as bool? ?? true;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Register");
+            }
+
+            ViewData["Email"] = email;
+            ViewData["EmailSent"] = emailSent;
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyEmail(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ViewData["Success"] = false;
+                ViewData["ErrorMessage"] = "Link xác thực không hợp lệ.";
+                return View();
+            }
+
+            var result = await _userService.VerifyEmailAsync(token);
+
+            ViewData["Success"] = result.Success;
+            ViewData["UserName"] = result.UserName;
+            ViewData["ErrorMessage"] = result.ErrorMessage;
+
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResendVerification()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendVerification(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError("email", "Vui lòng nhập email.");
+                return View();
+            }
+
+            email = email.Trim().ToLowerInvariant();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            var result = await _userService.ResendVerificationEmailAsync(email, baseUrl);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError("email", result.ErrorMessage ?? "Đã có lỗi xảy ra.");
+                return View();
+            }
+
+            TempData["SuccessMessage"] = "Email xác thực đã được gửi! Vui lòng kiểm tra hộp thư của bạn.";
             return RedirectToAction("Login");
         }
 

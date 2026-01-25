@@ -35,6 +35,7 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IWalletRepository, WalletRepository>();
 
             // Register Services
+            serviceCollection.AddScoped<IEmailService, EmailService>();
             serviceCollection.AddScoped<IUserService, UserService>();
             serviceCollection.AddScoped<IProductService, ProductService>();
             serviceCollection.AddScoped<ICartService, CartService>();

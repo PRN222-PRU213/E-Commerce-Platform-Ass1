@@ -16,6 +16,11 @@
 
         public DateTime CreatedAt { get; set; }
 
+        // Email Verification
+        public bool EmailVerified { get; set; } = false;
+        public string? EmailVerificationToken { get; set; }
+        public DateTime? EmailVerificationTokenExpiry { get; set; }
+
         // Navigation property
         public Role Role { get; set; } = null!;
 

@@ -56,7 +56,20 @@ namespace E_Commerce_Platform_Ass1.Data.Database.Configurations
             builder.HasIndex(u => u.Email)
                    .IsUnique();
 
+            // Email Verification
+            builder.Property(u => u.EmailVerified)
+                   .HasDefaultValue(false)
+                   .IsRequired();
 
-        }
+            builder.Property(u => u.EmailVerificationToken)
+                   .HasMaxLength(255)
+                   .IsRequired(false);
+
+            builder.Property(u => u.EmailVerificationTokenExpiry)
+                   .IsRequired(false);
+
+            builder.HasIndex(u => u.EmailVerificationToken)
+                   .IsUnique()
+                   .HasFilter("[EmailVerificationToken] IS NOT NULL");        }
     }
 }
