@@ -1,4 +1,7 @@
+using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
+using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +30,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var dashboard = await _adminService.GetDashboardStatisticsAsync();
-            return View(dashboard);
+            var viewModel = dashboard.ToViewModel();
+            return View(viewModel);
         }
 
         #endregion
@@ -46,11 +50,12 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                return View(new List<E_Commerce_Platform_Ass1.Service.DTOs.ShopDto>());
+                return View(new List<AdminShopViewModel>());
             }
 
+            var viewModels = result.Data!.ToViewModels();
             ViewBag.CurrentStatus = status;
-            return View(result.Data);
+            return View(viewModels);
         }
 
         /// <summary>
@@ -65,7 +70,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction(nameof(Shops));
             }
 
-            return View(result.Data);
+            var viewModel = result.Data!.ToDetailViewModel();
+            return View(viewModel);
         }
 
         /// <summary>
@@ -119,10 +125,11 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                return View(new List<E_Commerce_Platform_Ass1.Service.DTOs.ProductDto>());
+                return View(new List<AdminProductViewModel>());
             }
 
-            return View(result.Data);
+            var viewModels = result.Data!.ToViewModels();
+            return View(viewModels);
         }
 
         /// <summary>
@@ -137,11 +144,12 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                return View(new List<E_Commerce_Platform_Ass1.Service.DTOs.ProductDto>());
+                return View(new List<AdminProductViewModel>());
             }
 
+            var viewModels = result.Data!.ToViewModels();
             ViewBag.CurrentStatus = status;
-            return View(result.Data);
+            return View(viewModels);
         }
 
         /// <summary>
@@ -156,7 +164,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction(nameof(PendingProducts));
             }
 
-            return View(result.Data);
+            var viewModel = result.Data!.ToDetailViewModel();
+            return View(viewModel);
         }
 
         /// <summary>
@@ -210,10 +219,11 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                return View(new List<E_Commerce_Platform_Ass1.Service.DTOs.CategoryDto>());
+                return View(new List<AdminCategoryViewModel>());
             }
 
-            return View(result.Data);
+            var viewModels = result.Data!.ToViewModels();
+            return View(viewModels);
         }
 
         /// <summary>
@@ -222,7 +232,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         [HttpGet]
         public IActionResult CreateCategory()
         {
-            return View();
+            return View(new CreateCategoryViewModel());
         }
 
         /// <summary>
@@ -230,15 +240,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateCategory(
-            E_Commerce_Platform_Ass1.Service.DTOs.CreateCategoryDto dto
-        )
+        public async Task<IActionResult> CreateCategory(CreateCategoryViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
-                return View(dto);
+                return View(viewModel);
             }
 
+            var dto = viewModel.ToDto();
             var result = await _adminService.CreateCategoryAsync(dto);
             if (result.IsSuccess)
             {
@@ -247,7 +256,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             TempData["Error"] = result.ErrorMessage;
-            return View(dto);
+            return View(viewModel);
         }
 
         /// <summary>
@@ -263,15 +272,9 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 return RedirectToAction(nameof(Categories));
             }
 
-            var dto = new E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto
-            {
-                Name = result.Data!.Name,
-                Status = result.Data.Status,
-            };
-
-            ViewBag.CategoryId = id;
+            var viewModel = result.Data!.ToEditViewModel();
             ViewBag.ProductCount = result.Data.ProductCount;
-            return View(dto);
+            return View(viewModel);
         }
 
         /// <summary>
@@ -279,17 +282,14 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCategory(
-            Guid id,
-            E_Commerce_Platform_Ass1.Service.DTOs.UpdateCategoryDto dto
-        )
+        public async Task<IActionResult> EditCategory(Guid id, EditCategoryViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.CategoryId = id;
-                return View(dto);
+                return View(viewModel);
             }
 
+            var dto = viewModel.ToDto();
             var result = await _adminService.UpdateCategoryAsync(id, dto);
             if (result.IsSuccess)
             {
@@ -298,8 +298,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             TempData["Error"] = result.ErrorMessage;
-            ViewBag.CategoryId = id;
-            return View(dto);
+            return View(viewModel);
         }
 
         /// <summary>
