@@ -108,7 +108,7 @@ Update-Database
 ---
 
 ## 👨‍💻 Tác giả
-- Sinh viên: *(Điền tên của bạn)*
+- Sinh viên: **
 - Assignment 1 – ASP.NET Core MVC
 
 ---
