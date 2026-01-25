@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Xác thực Email";
+    Layout = "~/Views/Shared/_EShopperLayout.cshtml";
+    var success = ViewData["Success"] as bool? ?? false;
+    var userName = ViewData["UserName"]?.ToString();
+    var errorMessage = ViewData["ErrorMessage"]?.ToString();
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid bg-secondary mb-5">
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px">
+        <h1 class="font-weight-semi-bold text-uppercase mb-3">Xác thực Email</h1>
+        <div class="d-inline-flex">
+            <p class="m-0"><a asp-controller="Home" asp-action="Index">Trang chủ</a></p>
+            <p class="m-0 px-2">-</p>
+            <p class="m-0">Xác thực Email</p>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Verify Email Result Start -->
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5 justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="text-center bg-light p-5 rounded">
+                @if (success)
+                {
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 100px;"></i>
+                    </div>
+                    <h2 class="text-success mb-4">Xác thực thành công!</h2>
+                    
+                    @if (!string.IsNullOrEmpty(userName))
+                    {
+                        <p class="lead mb-4">
+                            Chào mừng <strong>@userName</strong>! 🎉
+                        </p>
+                    }
+                    
+                    <p class="text-muted mb-4">
+                        Email của bạn đã được xác thực thành công. Bây giờ bạn có thể đăng nhập và khám phá hàng ngàn sản phẩm tuyệt vời!
+                    </p>
+                    
+                    <a asp-action="Login" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập ngay
+                    </a>
+                }
+                else
+                {
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size: 100px;"></i>
+                    </div>
+                    <h2 class="text-danger mb-4">Xác thực thất bại</h2>
+                    
+                    <div class="alert alert-danger mb-4">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        @(errorMessage ?? "Đã có lỗi xảy ra trong quá trình xác thực.")
+                    </div>
+                    
+                    <p class="text-muted mb-4">
+                        Bạn có thể yêu cầu gửi lại email xác thực nếu link đã hết hạn.
+                    </p>
+                    
+                    <a asp-action="ResendVerification" class="btn btn-warning btn-lg">
+                        <i class="fas fa-redo mr-2"></i>Gửi lại email xác thực
+                    </a>
+                }
+                
+                <div class="mt-5">
+                    <a asp-controller="Home" asp-action="Index" class="text-muted">
+                        <i class="fas fa-home mr-1"></i>Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Verify Email Result End -->
