@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions;
 using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +53,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 Description = shop.Description,
                 Status = shop.Status,
                 CreatedAt = shop.CreatedAt,
-                Products = products,
+                Products = products.ToShopProductViewModels(),
             };
 
             return View(viewModel);
@@ -158,7 +159,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 Description = shop.Description,
                 Status = shop.Status,
                 CreatedAt = shop.CreatedAt,
-                Products = products,
+                Products = products.ToShopProductViewModels(),
             };
 
             return View(viewModel);
@@ -193,7 +194,8 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             var statistics = await _shopService.GetShopStatisticsAsync(shop.Id);
-            return View(statistics);
+            var viewModel = statistics.ToViewModel();
+            return View(viewModel);
         }
     }
 }
