@@ -253,22 +253,22 @@
 
                             <!-- Status -->
                             <div class="col-2 text-center order-cell" style="justify-content: center;">
-                                <span class="status-badge 
-                                    @(item.Status == "Paid" ? "bg-success" :
+                                <span class="status-badge status-badge-fixed
+                                    @(item.Status == "Paid" ? "bg-success-dark" :
                                       item.Status == "Pending" ? "bg-warning text-dark" :
                                       item.Status == "Cancelled" ? "bg-danger" :
                                       item.Status == "Processing" ? "bg-info" :
                                       item.Status == "Preparing" ? "bg-purple" :
                                       item.Status == "Shipped" ? "bg-primary" :
-                                      item.Status == "Completed" ? "bg-success-dark" :
+                                      item.Status == "Completed" ? "bg-success" :
                                       "bg-secondary")">
-                                    @(item.Status == "Paid" ? "✓ Đã thanh toán" :
-                                      item.Status == "Pending" ? "⏳ Chờ xử lý" :
-                                      item.Status == "Cancelled" ? "✗ Đã hủy" :
-                                      item.Status == "Processing" ? "🔄 Đang xử lý" :
-                                      item.Status == "Preparing" ? "📦 Đang chuẩn bị" :
-                                      item.Status == "Shipped" ? "🚚 Đang giao hàng" :
-                                      item.Status == "Completed" ? "✅ Hoàn thành" :
+                                    @(item.Status == "Paid" ? "Đã thanh toán" :
+                                      item.Status == "Pending" ? "Chờ xử lý" :
+                                      item.Status == "Cancelled" ? "Đã hủy" :
+                                      item.Status == "Processing" ? "Đang xử lý" :
+                                      item.Status == "Preparing" ? "Chuẩn bị hàng" :
+                                      item.Status == "Shipped" ? "Vận chuyển" :
+                                      item.Status == "Completed" ? "Hoàn thành" :
                                       item.Status)
                                 </span>
                             </div>

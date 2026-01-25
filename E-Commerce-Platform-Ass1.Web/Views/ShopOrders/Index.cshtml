@@ -97,6 +97,9 @@
                 <a asp-action="Index" class="btn @(string.IsNullOrEmpty(currentStatus) ? "btn-primary" : "btn-outline-primary")">
                     <i class="fas fa-list"></i> Tất cả
                 </a>
+                <a asp-action="Index" asp-route-status="Paid" class="btn @(currentStatus == "Paid" ? "bg-success-dark text-white" : "btn-outline-success")">
+                    <i class="fas fa-check-double"></i> Đã thanh toán
+                </a>
                 <a asp-action="Index" asp-route-status="Pending" class="btn @(currentStatus == "Pending" ? "btn-warning" : "btn-outline-warning")">
                     <i class="fas fa-clock"></i> Chờ xử lý
                 </a>
@@ -156,23 +159,26 @@
                                     <td>
                                         @switch (order.Status)
                                         {
+                                            case "Paid":
+                                                <span class="badge badge-success-dark status-badge-fixed">Đã thanh toán</span>
+                                                break;
                                             case "Pending":
-                                                <span class="badge badge-warning">Chờ xử lý</span>
+                                                <span class="badge badge-warning status-badge-fixed">Chờ xử lý</span>
                                                 break;
                                             case "Processing":
-                                                <span class="badge badge-info">Đang xử lý</span>
+                                                <span class="badge badge-info status-badge-fixed">Đang xử lý</span>
                                                 break;
                                             case "Preparing":
-                                                <span class="badge badge-primary">Chuẩn bị hàng</span>
+                                                <span class="badge badge-primary status-badge-fixed">Chuẩn bị hàng</span>
                                                 break;
                                             case "Shipped":
-                                                <span class="badge badge-primary">Vận chuyển</span>
+                                                <span class="badge badge-primary status-badge-fixed">Vận chuyển</span>
                                                 break;
                                             case "Completed":
-                                                <span class="badge badge-success">Hoàn thành</span>
+                                                <span class="badge badge-success status-badge-fixed">Hoàn thành</span>
                                                 break;
                                             case "Cancelled":
-                                                <span class="badge badge-danger">Đã hủy</span>
+                                                <span class="badge badge-danger status-badge-fixed">Đã hủy</span>
                                                 break;
                                             default:
                                                 <span class="badge badge-secondary">@order.Status</span>

@@ -241,22 +241,22 @@
                     Trạng thái
                 </div>
                 <div class="info-value">
-                    <span class="status-badge 
-                        @(Model.Status == "Paid" ? "bg-success" :
+                    <span class="status-badge status-badge-fixed
+                        @(Model.Status == "Paid" ? "bg-success-dark" :
                           Model.Status == "Pending" ? "bg-warning text-dark" :
                           Model.Status == "Cancelled" ? "bg-danger" :
                           Model.Status == "Processing" ? "bg-info" :
                           Model.Status == "Preparing" ? "bg-purple" :
                           Model.Status == "Shipped" ? "bg-primary" :
-                          Model.Status == "Completed" ? "bg-success-dark" :
+                          Model.Status == "Completed" ? "bg-success" :
                           "bg-secondary")">
-                        @(Model.Status == "Paid" ? "✓ Đã thanh toán" :
-                          Model.Status == "Pending" ? "⏳ Chờ xử lý" :
-                          Model.Status == "Cancelled" ? "✗ Đã hủy" :
-                          Model.Status == "Processing" ? "🔄 Đang xử lý" :
-                          Model.Status == "Preparing" ? "📦 Đang chuẩn bị" :
-                          Model.Status == "Shipped" ? "🚚 Đang giao hàng" :
-                          Model.Status == "Completed" ? "✅ Hoàn thành" :
+                        @(Model.Status == "Paid" ? "Đã thanh toán" :
+                          Model.Status == "Pending" ? "Chờ xử lý" :
+                          Model.Status == "Cancelled" ? "Đã hủy" :
+                          Model.Status == "Processing" ? "Đang xử lý" :
+                          Model.Status == "Preparing" ? "Chuẩn bị hàng" :
+                          Model.Status == "Shipped" ? "Vận chuyển" :
+                          Model.Status == "Completed" ? "Hoàn thành" :
                           Model.Status)
                     </span>
                 </div>

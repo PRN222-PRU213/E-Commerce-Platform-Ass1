@@ -324,13 +324,23 @@
                                                     {
                                                         "completed" or "delivered" => "badge-success",
                                                         "cancelled" or "canceled" => "badge-danger",
-                                                        "pending" or "paid" => "badge-warning",
+                                                        "paid" => "bg-success-dark",
+                                                        "pending" => "badge-warning",
                                                         "processing" or "preparing" => "badge-info",
                                                         "shipped" or "shipping" => "badge-primary",
                                                         _ => "badge-secondary"
                                                     };
                                                 }
-                                                <span class="badge @badgeClass">@order.Status</span>
+                                                <span class="status-badge status-badge-fixed @badgeClass">
+                                                    @(order.Status == "Paid" ? "Đã thanh toán" :
+                                                      order.Status == "Pending" ? "Chờ xử lý" :
+                                                      order.Status == "Cancelled" ? "Đã hủy" :
+                                                      order.Status == "Processing" ? "Đang xử lý" :
+                                                      order.Status == "Preparing" ? "Chuẩn bị hàng" :
+                                                      order.Status == "Shipped" ? "Vận chuyển" :
+                                                      order.Status == "Completed" ? "Hoàn thành" :
+                                                      order.Status)
+                                                </span>
                                             </td>
                                         </tr>
                                     }

@@ -208,6 +208,37 @@ body {
   padding: 0.5rem 1rem;
 }
 
+/* Status Badge Styles */
+.bg-success-dark {
+  background-color: #155724 !important;
+  color: white !important;
+}
+
+.badge-success-dark {
+  background-color: #155724;
+  color: white;
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.25rem;
+}
+
+.btn.bg-success-dark:hover {
+  background-color: #10461d !important;
+}
+
+.status-badge {
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-block;
+  text-align: center;
+  color: white !important;
+}
+
+.status-badge-fixed {
+  min-width: 120px;
+}
+
 /* Footer Styles */
 .footer {
   background-color: #EDF1FF;

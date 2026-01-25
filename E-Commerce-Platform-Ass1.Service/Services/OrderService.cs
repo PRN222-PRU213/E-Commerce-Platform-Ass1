@@ -25,7 +25,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             if (!orders.Any())
             {
-                throw new Exception("Customer not exists orders.");
+                return new List<OrderDto>();
             }
 
             var orderDtos = orders.Select(o => new OrderDto
