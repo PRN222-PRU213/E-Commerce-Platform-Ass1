@@ -22,6 +22,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            TempData.Remove("ErrorMessage");
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
@@ -40,6 +41,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Verify()
         {
+            TempData.Remove("ErrorMessage");
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
@@ -75,6 +77,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 var result = await _eKycService.VerifyAndSaveAsync(userId, model.FrontCard, model.BackCard, model.Selfie);
                 if (result.IsSuccess)
                 {
+                    TempData.Remove("ErrorMessage");
                     TempData["SuccessMessage"] = "Xác thực danh tính thành công!";
                     return RedirectToAction("Status");
                 }
