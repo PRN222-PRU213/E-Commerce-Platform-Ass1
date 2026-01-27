@@ -71,7 +71,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             try
             {
-                var success = await _eKycService.VerifyAndSaveAsync(userId, model.FrontCard, model.BackCard);
+                var success = await _eKycService.VerifyAndSaveAsync(userId, model.FrontCard, model.BackCard, model.Selfie);
                 if (success)
                 {
                     TempData["SuccessMessage"] = "Xác thực danh tính thành công!";

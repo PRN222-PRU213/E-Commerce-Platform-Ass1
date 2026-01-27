@@ -12,6 +12,10 @@ namespace E_Commerce_Platform_Ass1.Web.Models
         [Required(ErrorMessage = "Vui lòng tải lên ảnh mặt sau CCCD")]
         [Display(Name = "Ảnh mặt sau CCCD")]
         public IFormFile BackCard { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng chụp ảnh chân dung")]
+        [Display(Name = "Ảnh chân dung")]
+        public IFormFile Selfie { get; set; }
     }
 
     public class KYCStatusViewModel

@@ -52,6 +52,51 @@
                         </div>
                     </div>
 
+                    <!-- Ảnh chân dung (Camera Capture) -->
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 mb-4">
+                            <label class="font-weight-semi-bold mb-2">Ảnh chân dung (Selfie) <span class="text-danger">*</span></label>
+                            <div class="camera-container border rounded overflow-hidden bg-dark position-relative" style="min-height: 300px;">
+                                <!-- Video Stream -->
+                                <video id="video" class="w-100 h-100 d-none" autoplay playsinline></video>
+                                
+                                <!-- Placeholder / Preview -->
+                                <div id="camera-placeholder" class="d-flex flex-column align-items-center justify-content-center h-100 py-5 text-white">
+                                    <i class="fas fa-camera-retro fa-4x mb-3 text-primary"></i>
+                                    <p>Sử dụng camera để chụp ảnh chân dung</p>
+                                    <button type="button" class="btn btn-primary px-4" id="btn-start-camera">
+                                        <i class="fas fa-video mr-2"></i>Mở Camera
+                                    </button>
+                                </div>
+
+                                <!-- Captured Preview -->
+                                <img id="preview-selfie" class="img-fluid d-none w-100 h-100" style="object-fit: cover;" />
+
+                                <!-- Camera Controls -->
+                                <div id="camera-controls" class="position-absolute w-100 text-center d-none" style="bottom: 20px;">
+                                    <button type="button" class="btn btn-danger btn-circle btn-lg shadow" id="btn-capture">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                </div>
+                                
+                                <div id="retake-controls" class="position-absolute w-100 text-center d-none" style="bottom: 20px;">
+                                    <button type="button" class="btn btn-warning shadow" id="btn-retake">
+                                        <i class="fas fa-sync-alt mr-2"></i>Chụp lại
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden Canvas for capturing -->
+                            <canvas id="canvas" class="d-none" width="640" height="480"></canvas>
+                            
+                            <!-- Actual Hidden Input for Form -->
+                            <input type="file" asp-for="Selfie" class="d-none" id="input-selfie" />
+                            
+                            <span asp-validation-for="Selfie" class="text-danger small d-block text-center mt-2"></span>
+                            <small class="form-text text-muted text-center mt-2">Vui lòng nhìn thẳng vào camera và đảm bảo đủ ánh sáng.</small>
+                        </div>
+                    </div>
+
 
 
                     <div class="alert alert-info mt-4">
@@ -106,6 +151,27 @@
     }
 
 
+    .btn-circle.btn-lg {
+        width: 60px;
+        height: 60px;
+        padding: 10px 16px;
+        font-size: 24px;
+        line-height: normal;
+        border-radius: 35px;
+    }
+
+    .camera-container {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        background-color: #000;
+    }
+
+    #video {
+        transform: scaleX(-1); /* Mirror camera feed for selfie */
+    }
+
+    #preview-selfie {
+        transform: scaleX(-1); /* Keep selfie mirrored for preview */
+    }
 </style>
 
 @section Scripts {
@@ -128,6 +194,72 @@
 
         handleImagePreview('input-front', 'preview-front');
         handleImagePreview('input-back', 'preview-back');
+
+        // Camera Selfie Logic
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const previewSelfie = document.getElementById('preview-selfie');
+        const inputSelfie = document.getElementById('input-selfie');
+        const btnStartCamera = document.getElementById('btn-start-camera');
+        const btnCapture = document.getElementById('btn-capture');
+        const btnRetake = document.getElementById('btn-retake');
+        const cameraPlaceholder = document.getElementById('camera-placeholder');
+        const cameraControls = document.getElementById('camera-controls');
+        const retakeControls = document.getElementById('retake-controls');
+
+        let stream = null;
+
+        btnStartCamera.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: false 
+                });
+                video.srcObject = stream;
+                video.classList.remove('d-none');
+                cameraPlaceholder.classList.add('d-none');
+                cameraControls.classList.remove('d-none');
+            } catch (err) {
+                alert("Không thể truy cập camera. Vui lòng đảm bảo bạn đã cấp quyền truy cập camera cho trình duyệt.");
+                console.error(err);
+            }
+        });
+
+        btnCapture.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+                const container = new DataTransfer();
+                container.items.add(file);
+                inputSelfie.files = container.files;
+                
+                previewSelfie.src = URL.createObjectURL(blob);
+                previewSelfie.classList.remove('d-none');
+                video.classList.add('d-none');
+                cameraControls.classList.add('d-none');
+                retakeControls.classList.remove('d-none');
+                
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            }, 'image/jpeg', 0.9);
+        });
+
+        btnRetake.addEventListener('click', async () => {
+            previewSelfie.classList.add('d-none');
+            retakeControls.classList.add('d-none');
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
+                video.classList.remove('d-none');
+                cameraControls.classList.remove('d-none');
+                inputSelfie.value = "";
+            } catch (err) { console.error(err); }
+        });
 
 
 

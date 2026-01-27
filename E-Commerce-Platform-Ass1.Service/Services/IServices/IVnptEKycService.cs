@@ -5,6 +5,6 @@ namespace E_Commerce_Platform_Ass1.Service.Services.IServices
 {
     public interface IVnptEKycService
     {
-        Task<EKycResult> VerifyAsync(IFormFile front, IFormFile back);
+        Task<EKycResult> VerifyAsync(IFormFile front, IFormFile back, IFormFile selfie);
     }
 }

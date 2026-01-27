@@ -21,9 +21,9 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             return await _eKycRepository.IsUserVerifiedAsync(userId);
         }
 
-        public async Task<bool> VerifyAndSaveAsync(Guid userId, IFormFile front, IFormFile back)
+        public async Task<bool> VerifyAndSaveAsync(Guid userId, IFormFile front, IFormFile back, IFormFile selfie)
         {
-            var result = await _vnptEKycService.VerifyAsync(front, back);
+            var result = await _vnptEKycService.VerifyAsync(front, back, selfie);
             if (!result.IsSuccess)
             {
                 return false;
@@ -35,8 +35,8 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 UserId = userId,
                 CccdNumber = result.CCCDNumber,
                 FullName = result.FullName,
-                FaceMatchScore = 0, // Không còn kiểm tra face match
-                Liveness = true,    // Mặc định true khi bỏ qua liveness
+                FaceMatchScore = result.FaceMatchScore,
+                Liveness = true,    
                 Status = "VERIFIED",
                 CreatedAt = DateTime.Now
             };
