@@ -495,6 +495,108 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         }
 
         /// <summary>
+        /// GET /Products/Variants/{variantId}/Edit - Form chỉnh sửa biến thể
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> EditVariant(Guid variantId)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get variant details
+            var variantResult = await _productVariantService.GetByIdAsync(variantId);
+            if (!variantResult.IsSuccess || variantResult.Data == null)
+            {
+                TempData["ErrorMessage"] = variantResult.ErrorMessage ?? "Không tìm thấy biến thể.";
+                return RedirectToAction("Index");
+            }
+
+            var variant = variantResult.Data;
+
+            // Get product to check ownership and status
+            var productResult = await _productService.GetProductDetailAsync(variant.ProductId, shop.Id);
+            if (!productResult.IsSuccess)
+            {
+                TempData["ErrorMessage"] = productResult.ErrorMessage ?? "Không tìm thấy sản phẩm.";
+                return RedirectToAction("Index");
+            }
+
+            var product = productResult.Data!;
+            if (product.Status != "draft")
+            {
+                TempData["ErrorMessage"] = "Chỉ có thể chỉnh sửa biến thể khi sản phẩm ở trạng thái bản nháp.";
+                return RedirectToAction("Edit", new { id = variant.ProductId });
+            }
+
+            var viewModel = new EditVariantViewModel
+            {
+                Id = variant.Id,
+                ProductId = variant.ProductId,
+                ProductName = product.Name,
+                VariantName = variant.VariantName,
+                Price = variant.Price,
+                Size = variant.Size,
+                Color = variant.Color,
+                Stock = variant.Stock,
+                Sku = variant.Sku,
+                ImageUrl = variant.ImageUrl,
+            };
+
+            return View("~/Views/Shop/Products/EditVariant.cshtml", viewModel);
+        }
+
+        /// <summary>
+        /// POST /Products/Variants/Update - Cập nhật biến thể
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateVariant(EditVariantViewModel viewModel)
+        {
+            var shop = await GetCurrentUserShopAsync();
+            if (shop == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Shop/Products/EditVariant.cshtml", viewModel);
+            }
+
+            var dto = new UpdateProductVariantDto
+            {
+                Id = viewModel.Id,
+                VariantName = viewModel.VariantName,
+                Price = viewModel.Price,
+                Size = viewModel.Size,
+                Color = viewModel.Color,
+                Stock = viewModel.Stock,
+                Sku = viewModel.Sku ?? string.Empty,
+                ImageUrl = viewModel.ImageUrl,
+            };
+
+            var result = await _productVariantService.UpdateVariantAsync(dto, shop.Id);
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.ErrorMessage ?? "Không thể cập nhật biến thể."
+                );
+                return View("~/Views/Shop/Products/EditVariant.cshtml", viewModel);
+            }
+
+            TempData["SuccessMessage"] = "Cập nhật biến thể thành công!";
+            return RedirectToAction("Edit", new { id = viewModel.ProductId });
+        }
+
+
+        /// <summary>
         /// POST /Products/{id}/Submit - Submit sản phẩm để admin duyệt
         /// </summary>
         [HttpPost]
