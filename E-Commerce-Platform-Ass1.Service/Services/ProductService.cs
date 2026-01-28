@@ -42,7 +42,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         {
             var products = await _productRepository.GetAllAsync();
             return products
-                .Where(p => p.Status == "active")
+                .Where(p => p.Status == "Active")
                 .Select(p => MapToDto(p, p.Shop?.ShopName))
                 .ToList();
         }
@@ -339,7 +339,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Bạn không có quyền thao tác với sản phẩm này.");
             }
 
-            if (product.Status != "active")
+            if (product.Status != "Active")
             {
                 return ServiceResult.Failure("Chỉ có thể gỡ sản phẩm đang hoạt động.");
             }
