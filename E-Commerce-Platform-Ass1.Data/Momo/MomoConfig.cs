@@ -16,5 +16,10 @@ namespace E_Commerce_Platform_Ass1.Data.Momo
         public string ReturnUrl { get; set; }
         public string NotifyUrl { get; set; }
         public string RequestType { get; set; }
+        
+        /// <summary>
+        /// Callback URL riêng cho nạp tiền ví
+        /// </summary>
+        public string TopUpReturnUrl { get; set; } = string.Empty;
     }
 }

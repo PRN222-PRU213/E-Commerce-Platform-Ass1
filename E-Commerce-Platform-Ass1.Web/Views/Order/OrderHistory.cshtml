@@ -319,6 +319,18 @@
                                             <span>Hoàn tiền</span>
                                         </button>
                                     }
+
+                                    @if (item.Status == "Completed")
+                                    {
+                                        <a asp-controller="ReturnRequest"
+                                           asp-action="Create"
+                                           asp-route-orderId="@item.OrderId"
+                                           class="action-btn btn-refund"
+                                           title="Yêu cầu hoàn trả">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            <span>Hoàn trả</span>
+                                        </a>
+                                    }
                                 </div>
                             </div>
                         </div>

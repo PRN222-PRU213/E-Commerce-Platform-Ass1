@@ -286,5 +286,112 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
 
             return RedirectToAction("Index");
         }
+
+        #region Return Request Management
+
+        /// <summary>
+        /// GET /ShopOrders/ReturnRequests - Danh sách yêu cầu đổi trả
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ReturnRequests(string? status = null)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("RegisterShop", "Shop");
+            }
+
+            var returnRequestService = HttpContext.RequestServices.GetRequiredService<IReturnRequestService>();
+            var requests = await returnRequestService.GetShopRequestsAsync(shopId.Value, status);
+
+            ViewBag.CurrentStatus = status;
+            return View(requests);
+        }
+
+        /// <summary>
+        /// GET /ShopOrders/ReturnRequestDetail/{id} - Chi tiết yêu cầu đổi trả
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ReturnRequestDetail(Guid id)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("RegisterShop", "Shop");
+            }
+
+            var returnRequestService = HttpContext.RequestServices.GetRequiredService<IReturnRequestService>();
+            var request = await returnRequestService.GetShopRequestDetailAsync(id, shopId.Value);
+
+            if (request == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy yêu cầu này.";
+                return RedirectToAction("ReturnRequests");
+            }
+
+            return View(request);
+        }
+
+        /// <summary>
+        /// POST /ShopOrders/ApproveReturn/{id} - Duyệt yêu cầu hoàn trả
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveReturn(Guid id, decimal? approvedAmount, string? response)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("ReturnRequests");
+            }
+
+            var returnRequestService = HttpContext.RequestServices.GetRequiredService<IReturnRequestService>();
+            var result = await returnRequestService.ApproveRequestAsync(id, shopId.Value, approvedAmount, response);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Đã duyệt yêu cầu và hoàn tiền thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("ReturnRequestDetail", new { id });
+        }
+
+        /// <summary>
+        /// POST /ShopOrders/RejectReturn/{id} - Từ chối yêu cầu hoàn trả
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectReturn(Guid id, string response)
+        {
+            var shopId = await GetCurrentShopIdAsync();
+            if (shopId == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có shop.";
+                return RedirectToAction("ReturnRequests");
+            }
+
+            var returnRequestService = HttpContext.RequestServices.GetRequiredService<IReturnRequestService>();
+            var result = await returnRequestService.RejectRequestAsync(id, shopId.Value, response);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Đã từ chối yêu cầu hoàn trả.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+
+            return RedirectToAction("ReturnRequestDetail", new { id });
+        }
+
+        #endregion
     }
 }

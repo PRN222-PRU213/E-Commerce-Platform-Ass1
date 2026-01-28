@@ -7,6 +7,10 @@
 USE [ECommercePlatformDB]; -- Database name from appsettings.json
 GO
 
+SELECT * FROM EKycVerifications
+
+SELECT * FROM users
+
 -- Delete old data (if needed)
 DELETE FROM reviews;
 DELETE FROM order_items;
@@ -55,6 +59,9 @@ VALUES
 GO
 SELECT * From users
 UPDATE users SET EmailVerified = 1 WHERE EmailVerified = 0;
+UPDATE users
+SET PasswordHash = '123456'
+WHERE Email = 'admin@example.com';
 
 -- ============================================
 -- 3. CATEGORIES
@@ -80,6 +87,8 @@ GO
 -- ============================================
 -- 5. PRODUCTS
 -- ============================================
+UPDATE products SET Status = 'active' WHERE Status = 'Active';
+SELECT * FROm products
 INSERT INTO products (Id, ShopId, CategoryId, Name, Description, BasePrice, Status, AvgRating, ImageUrl, CreatedAt)
 VALUES
     -- Electronics
