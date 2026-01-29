@@ -60,7 +60,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
             if (daysSinceCompleted > deadlineDays)
             {
                 return ServiceResult<ReturnRequestDto>.Failure(
-                    $"Đã quá thời hạn {deadlineDays} ngày để yêu cầu {(dto.RequestType == "Return" ? "đổi trả" : "hoàn tiền")}.");
+                    $"Đã quá thời hạn {deadlineDays} ngày để yêu cầu {(dto.RequestType == "Return" ? "đổi trả" : "hoàn tiền")}. Bạn không thể thực hiện yêu cầu này nữa.");
             }
 
             // ⭐ BUSINESS RULE: Kiểm tra số lần yêu cầu trên đơn hàng

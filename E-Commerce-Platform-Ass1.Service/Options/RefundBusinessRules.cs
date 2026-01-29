@@ -17,7 +17,7 @@ namespace E_Commerce_Platform_Ass1.Service.Options
         /// <summary>
         /// Số ngày tối đa để yêu cầu đổi trả sau khi hoàn thành đơn hàng
         /// </summary>
-        public int ReturnDeadlineDays { get; set; } = 7;
+        public int ReturnDeadlineDays { get; set; } = 15;
 
         #endregion
 

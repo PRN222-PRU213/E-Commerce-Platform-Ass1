@@ -370,6 +370,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
 
             // Cập nhật order
             order.Status = "Completed";
+            order.CompletedAt = DateTime.UtcNow;
             await _orderRepository.UpdateAsync(order);
 
             // Cập nhật shipment
