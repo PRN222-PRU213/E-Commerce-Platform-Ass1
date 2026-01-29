@@ -84,5 +84,18 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories
             _context.ReturnRequests.Update(request);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> CountByOrderIdAsync(Guid orderId)
+        {
+            return await _context.ReturnRequests
+                .CountAsync(r => r.OrderId == orderId);
+        }
+
+        public async Task<int> CountByUserIdThisMonthAsync(Guid userId)
+        {
+            var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            return await _context.ReturnRequests
+                .CountAsync(r => r.UserId == userId && r.CreatedAt >= startOfMonth);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using E_Commerce_Platform_Ass1.Data.Repositories;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
+using E_Commerce_Platform_Ass1.Service.Options;
 using E_Commerce_Platform_Ass1.Service.Services;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
 
@@ -13,8 +14,12 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
         /// <summary>
         /// Register all services and repositories to the dependency injection container
         /// </summary>
-        public static void AddService(this IServiceCollection serviceCollection)
+        public static void AddService(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            // Register Options
+            serviceCollection.Configure<RefundBusinessRules>(
+                configuration.GetSection(RefundBusinessRules.SectionName));
+
             // Register Repositories
             serviceCollection.AddScoped<IUserRepository, UserRepository>();
             serviceCollection.AddScoped<IRoleRepository, RoleRepository>();

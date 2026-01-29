@@ -42,7 +42,7 @@ builder.Services.Configure<CloudinarySettings>(
 );
 
 // Register all repositories & services via extension method
-builder.Services.AddService();
+builder.Services.AddService(builder.Configuration);
 
 // Configure VnptEKyc
 builder.Services.Configure<VnptEKycConfig>(

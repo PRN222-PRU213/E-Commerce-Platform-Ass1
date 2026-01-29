@@ -10,6 +10,8 @@ namespace E_Commerce_Platform_Ass1.Data.Repositories.Interfaces
         Task<IEnumerable<ReturnRequest>> GetByUserIdAsync(Guid userId);
         Task<IEnumerable<ReturnRequest>> GetByShopIdAsync(Guid shopId, string? status = null);
         Task<bool> ExistsByOrderIdAsync(Guid orderId);
+        Task<int> CountByOrderIdAsync(Guid orderId);
+        Task<int> CountByUserIdThisMonthAsync(Guid userId);
         Task AddAsync(ReturnRequest request);
         Task UpdateAsync(ReturnRequest request);
     }

@@ -3,7 +3,9 @@ using E_Commerce_Platform_Ass1.Data.Database.Entities;
 using E_Commerce_Platform_Ass1.Data.Repositories.Interfaces;
 using E_Commerce_Platform_Ass1.Service.DTOs;
 using E_Commerce_Platform_Ass1.Service.Models;
+using E_Commerce_Platform_Ass1.Service.Options;
 using E_Commerce_Platform_Ass1.Service.Services.IServices;
+using Microsoft.Extensions.Options;
 
 namespace E_Commerce_Platform_Ass1.Service.Services
 {
@@ -13,17 +15,20 @@ namespace E_Commerce_Platform_Ass1.Service.Services
         private readonly IOrderRepository _orderRepository;
         private readonly IRefundService _refundService;
         private readonly IShopWalletService _shopWalletService;
+        private readonly RefundBusinessRules _rules;
 
         public ReturnRequestService(
             IReturnRequestRepository returnRequestRepository,
             IOrderRepository orderRepository,
             IRefundService refundService,
-            IShopWalletService shopWalletService)
+            IShopWalletService shopWalletService,
+            IOptions<RefundBusinessRules> rulesOptions)
         {
             _returnRequestRepository = returnRequestRepository;
             _orderRepository = orderRepository;
             _refundService = refundService;
             _shopWalletService = shopWalletService;
+            _rules = rulesOptions.Value;
         }
 
         #region Customer Methods
@@ -48,7 +53,33 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult<ReturnRequestDto>.Failure($"Không thể yêu cầu hoàn trả cho đơn hàng ở trạng thái '{order.Status}'.");
             }
 
-            // Check if request already exists
+            // ⭐ BUSINESS RULE: Kiểm tra thời hạn hoàn tiền
+            var completedDate = order.CompletedAt ?? order.CreatedAt;
+            var daysSinceCompleted = (DateTime.UtcNow - completedDate).Days;
+            var deadlineDays = dto.RequestType == "Return" ? _rules.ReturnDeadlineDays : _rules.RefundDeadlineDays;
+            if (daysSinceCompleted > deadlineDays)
+            {
+                return ServiceResult<ReturnRequestDto>.Failure(
+                    $"Đã quá thời hạn {deadlineDays} ngày để yêu cầu {(dto.RequestType == "Return" ? "đổi trả" : "hoàn tiền")}.");
+            }
+
+            // ⭐ BUSINESS RULE: Kiểm tra số lần yêu cầu trên đơn hàng
+            var orderRequestCount = await _returnRequestRepository.CountByOrderIdAsync(dto.OrderId);
+            if (orderRequestCount >= _rules.MaxRefundPerOrder)
+            {
+                return ServiceResult<ReturnRequestDto>.Failure(
+                    $"Đơn hàng này đã đạt giới hạn {_rules.MaxRefundPerOrder} lần yêu cầu hoàn tiền.");
+            }
+
+            // ⭐ BUSINESS RULE: Kiểm tra số lần yêu cầu trong tháng
+            var monthlyRequestCount = await _returnRequestRepository.CountByUserIdThisMonthAsync(dto.UserId);
+            if (monthlyRequestCount >= _rules.MaxRefundPerMonth)
+            {
+                return ServiceResult<ReturnRequestDto>.Failure(
+                    $"Bạn đã đạt giới hạn {_rules.MaxRefundPerMonth} yêu cầu hoàn tiền trong tháng này.");
+            }
+
+            // Check if request already exists (not rejected)
             var existingRequest = await _returnRequestRepository.ExistsByOrderIdAsync(dto.OrderId);
             if (existingRequest)
             {
@@ -176,18 +207,25 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                 return ServiceResult.Failure("Số tiền hoàn trả không hợp lệ.");
             }
 
+            // ⭐ BUSINESS RULE: Tính phí hoàn tiền dựa trên lý do
+            var isShopFault = _rules.IsShopFault(request.Reason);
+            var refundFee = _rules.CalculateFee(refundAmount, request.Reason);
+            var finalRefundAmount = refundAmount - refundFee;
+
             try
             {
                 // Gọi RefundService để hoàn tiền về ví khách hàng (TÁI SỬ DỤNG)
+                // Hoàn số tiền sau khi trừ phí
                 await _refundService.RefundAsync(
                     request.OrderId,
-                    refundAmount,
-                    $"Hoàn tiền theo yêu cầu #{request.Id}: {request.Reason}"
+                    finalRefundAmount,
+                    $"Hoàn tiền theo yêu cầu #{request.Id}: {request.Reason}" + 
+                    (refundFee > 0 ? $" (Phí: {refundFee:N0} VNĐ)" : "")
                 );
 
-                // ⭐ TRỪ TIỀN TỪ VÍ SHOP
-                // Sử dụng shopId (parameter) trực tiếp thay vì tìm lại từ OrderItems
-                await _shopWalletService.RefundOrderPaymentAsync(shopId, request.OrderId, refundAmount);
+                // ⭐ TRỪ TIỀN TỪ VÍ SHOP (toàn bộ số tiền, không trừ phí)
+                // Phí hoàn tiền do shop giữ lại
+                await _shopWalletService.RefundOrderPaymentAsync(shopId, request.OrderId, finalRefundAmount);
 
                 // Cập nhật trạng thái request
                 request.Status = "Approved";
