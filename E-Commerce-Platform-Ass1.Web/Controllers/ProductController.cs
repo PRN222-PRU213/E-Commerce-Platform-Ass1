@@ -1,16 +1,25 @@
 ﻿using E_Commerce_Platform_Ass1.Service.Services.IServices;
 using E_Commerce_Platform_Ass1.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace E_Commerce_Platform_Ass1.Web.Controllers
 {
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
+        private readonly IUserBehaviorService _behaviorService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IUserBehaviorService behaviorService)
         {
             _productService = productService;
+            _behaviorService = behaviorService;
+        }
+
+        private Guid? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
         }
 
         public async Task<IActionResult> Detail(Guid id)
@@ -19,6 +28,20 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             if (productDto == null)
             {
                 return NotFound();
+            }
+
+            // Track user viewing this product for AI personalization
+            var userId = GetCurrentUserId();
+            if (userId.HasValue)
+            {
+                try
+                {
+                    await _behaviorService.TrackViewAsync(userId.Value, id);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Không thể theo dõi hành vi của người dùng ở product detail.");
+                }
             }
 
             var viewModel = new ProductDetailViewModel

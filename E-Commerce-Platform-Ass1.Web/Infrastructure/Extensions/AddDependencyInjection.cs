@@ -62,6 +62,17 @@ namespace E_Commerce_Platform_Ass1.Web.Infrastructure.Extensions
             serviceCollection.AddScoped<IReturnRequestService, ReturnRequestService>();
             serviceCollection.AddScoped<IShopWalletService, ShopWalletService>();
 
+            // Personalization Services
+            serviceCollection.AddScoped<IUserBehaviorRepository, UserBehaviorRepository>();
+            serviceCollection.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+            serviceCollection.AddScoped<IUserBehaviorService, UserBehaviorService>();
+            serviceCollection.AddScoped<IPersonalizationService, PersonalizationService>();
+            
+            // Gemini AI Service with HttpClient
+            serviceCollection.Configure<GeminiSettings>(
+                configuration.GetSection(GeminiSettings.SectionName));
+            serviceCollection.AddHttpClient<IGeminiService, GeminiService>();
+
             // Register External APIs
             serviceCollection.AddScoped<IMomoApi, MomoApi>();
         }

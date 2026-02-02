@@ -63,21 +63,7 @@ namespace E_Commerce_Platform_Ass1.Service.Services
                     $"Đã quá thời hạn {deadlineDays} ngày để yêu cầu {(dto.RequestType == "Return" ? "đổi trả" : "hoàn tiền")}. Bạn không thể thực hiện yêu cầu này nữa.");
             }
 
-            // ⭐ BUSINESS RULE: Kiểm tra số lần yêu cầu trên đơn hàng
-            var orderRequestCount = await _returnRequestRepository.CountByOrderIdAsync(dto.OrderId);
-            if (orderRequestCount >= _rules.MaxRefundPerOrder)
-            {
-                return ServiceResult<ReturnRequestDto>.Failure(
-                    $"Đơn hàng này đã đạt giới hạn {_rules.MaxRefundPerOrder} lần yêu cầu hoàn tiền.");
-            }
 
-            // ⭐ BUSINESS RULE: Kiểm tra số lần yêu cầu trong tháng
-            var monthlyRequestCount = await _returnRequestRepository.CountByUserIdThisMonthAsync(dto.UserId);
-            if (monthlyRequestCount >= _rules.MaxRefundPerMonth)
-            {
-                return ServiceResult<ReturnRequestDto>.Failure(
-                    $"Bạn đã đạt giới hạn {_rules.MaxRefundPerMonth} yêu cầu hoàn tiền trong tháng này.");
-            }
 
             // Check if request already exists (not rejected)
             var existingRequest = await _returnRequestRepository.ExistsByOrderIdAsync(dto.OrderId);

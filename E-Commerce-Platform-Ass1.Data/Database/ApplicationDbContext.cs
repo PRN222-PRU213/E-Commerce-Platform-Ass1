@@ -30,6 +30,10 @@ namespace E_Commerce_Platform_Ass1.Data.Database
         public DbSet<ShopWallet> ShopWallets { get; set; } = null!;
         public DbSet<ShopWalletTransaction> ShopWalletTransactions { get; set; } = null!;
 
+        // Personalization
+        public DbSet<UserBehavior> UserBehaviors { get; set; } = null!;
+        public DbSet<UserPreference> UserPreferences { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -55,6 +59,10 @@ namespace E_Commerce_Platform_Ass1.Data.Database
             modelBuilder.ApplyConfiguration(new ReturnRequestConfiguration());
             modelBuilder.ApplyConfiguration(new ShopWalletConfiguration());
             modelBuilder.ApplyConfiguration(new ShopWalletTransactionConfiguration());
+
+            // Personalization
+            modelBuilder.ApplyConfiguration(new UserBehaviorConfiguration());
+            modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
         }
     }
 }
