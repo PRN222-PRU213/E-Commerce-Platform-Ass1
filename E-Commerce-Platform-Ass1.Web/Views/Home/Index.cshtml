@@ -134,6 +134,44 @@
 </div>
 <!-- Categories End -->
 
+<!-- AI Personalized Products Start -->
+@if (Model.PersonalizedProducts.Any())
+{
+    <div class="container-fluid pt-5">
+        <div class="text-center mb-4">
+            <h2 class="section-title px-5"><span class="px-2">🎯 Gợi ý dành riêng cho bạn</span></h2>
+            <p class="text-muted">Sản phẩm được AI đề xuất dựa trên sở thích của bạn</p>
+        </div>
+        <div class="row px-xl-5 pb-3">
+            @foreach (var product in Model.PersonalizedProducts)
+            {
+                <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+                    <div class="card product-item border-0 mb-4" style="border-left: 3px solid #d19c97 !important;">
+                        <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                            <img class="img-fluid w-100" src="@(string.IsNullOrEmpty(product.ImageUrl) ? "img/product-1.jpg" : product.ImageUrl)" alt="">
+                            <span class="badge badge-primary position-absolute" style="top: 10px; left: 10px; background: linear-gradient(135deg, #d19c97, #a26b65);">
+                                <i class="fas fa-magic"></i> AI Gợi ý
+                            </span>
+                        </div>
+                        <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                            <h6 class="text-truncate mb-2">@product.Name</h6>
+                            <small class="text-muted"><i class="fas fa-lightbulb"></i> @product.RecommendReason</small>
+                            <div class="d-flex justify-content-center mt-2">
+                                <h6 class="text-primary">@product.Price.ToString("N0") VNĐ</h6>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between bg-light border">
+                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@product.ProductId" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết</a>
+                            <a href="javascript:void(0);" onclick="openQuickView('@product.ProductId')" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+<!-- AI Personalized Products End -->
+
 <!-- Offer Start -->
 <div class="container-fluid offer pt-5">
     <div class="row px-xl-5">
@@ -190,27 +228,6 @@
     </div>
 </div>
 <!-- Products End -->
-
-<!-- Subscribe Start -->
-<div class="container-fluid bg-secondary my-5">
-    <div class="row justify-content-md-center py-5 px-xl-5">
-        <div class="col-md-6 col-12 py-5">
-            <div class="text-center mb-2 pb-2">
-                <h2 class="section-title px-5 mb-3"><span class="bg-secondary px-2">Cập nhật thông tin</span></h2>
-                <p>Đăng ký để nhận những thông tin mới nhất về sản phẩm và khuyến mãi từ chúng tôi.</p>
-            </div>
-            <form action="">
-                <div class="input-group">
-                    <input type="text" class="form-control border-white p-4" placeholder="Nhập Email tại đây">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary px-4">Đăng ký</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- Subscribe End -->
 
 <!-- Products Start -->
 <div class="container-fluid pt-5">

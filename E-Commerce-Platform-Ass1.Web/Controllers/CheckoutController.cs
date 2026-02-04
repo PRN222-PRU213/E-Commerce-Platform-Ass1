@@ -11,15 +11,18 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
         private readonly ICheckoutService _checkoutService;
         private readonly IUserService _userService;
         private readonly IShopWalletService _shopWalletService;
+        private readonly IUserBehaviorService _behaviorService;
 
         public CheckoutController(
             ICheckoutService checkoutService, 
             IUserService userService,
-            IShopWalletService shopWalletService)
+            IShopWalletService shopWalletService,
+            IUserBehaviorService behaviorService)
         {
             _checkoutService = checkoutService;
             _userService = userService;
             _shopWalletService = shopWalletService;
+            _behaviorService = behaviorService;
         }
 
         [HttpGet]
@@ -63,7 +66,7 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                 decimal walletUsed = decimal.Parse(walletUsedStr);
                 decimal momoAmount = decimal.Parse(momoAmountStr ?? "0");
 
-                // ⭐ GỌI SERVICE DUY NHẤT
+                
                 var newOrder = await _checkoutService.ConfirmPaymentAsync(
                     userId,
                     shippingAddress,
@@ -72,8 +75,18 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
                     momoAmount
                 );
 
-                // ⭐ PHÂN PHỐI TIỀN CHO CÁC SHOP
+                
                 await _shopWalletService.DistributeOrderPaymentAsync(newOrder.Id);
+
+                
+                try
+                {
+                    await _behaviorService.TrackPurchaseAsync(userId, newOrder.Id);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Không thể theo dõi hành vi của người dùng ở checkout.");
+                }
 
                 HttpContext.Session.Clear();
 

@@ -7,10 +7,12 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
+        private readonly IUserBehaviorService _behaviorService;
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, IUserBehaviorService behaviorService)
         {
             _cartService = cartService;
+            _behaviorService = behaviorService;
         }
 
         public async Task<IActionResult> Index()
@@ -81,6 +83,16 @@ namespace E_Commerce_Platform_Ass1.Web.Controllers
             }
 
             await _cartService.AddToCart(userId, productVariantId, quantity);
+
+            // Track user adding to cart for AI personalization
+            try
+            {
+                await _behaviorService.TrackAddToCartAsync(userId, productId, quantity);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Không thể theo dõi hành vi của người dùng ở cart.");
+            }
 
             TempData["SuccessMessage"] = "Đã thêm sản phẩm vào giỏ hàng thành công!";
 

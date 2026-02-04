@@ -36,6 +36,25 @@ namespace E_Commerce_Platform_Ass1.Web.Models
     public class HomeIndexViewModel
     {
         public List<HomeProductItemViewModel> Products { get; set; } = new();
+        
+        /// <summary>
+        /// Sản phẩm được AI cá nhân hóa cho user
+        /// </summary>
+        public List<PersonalizedProductViewModel> PersonalizedProducts { get; set; } = new();
+    }
+
+    /// <summary>
+    /// ViewModel cho sản phẩm được AI cá nhân hóa
+    /// </summary>
+    public class PersonalizedProductViewModel
+    {
+        public Guid ProductId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public decimal Price { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public string ShopName { get; set; } = string.Empty;
+        public string RecommendReason { get; set; } = string.Empty;
     }
 
     /// <summary>
